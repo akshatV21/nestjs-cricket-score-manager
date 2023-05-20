@@ -1,6 +1,6 @@
 import { USER_TYPE, UserType } from '@lib/utils'
 import { Type } from 'class-transformer'
-import { IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import { IsEmail, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 import { Types } from 'mongoose'
 
 export class RegisterUserDto {
@@ -13,7 +13,7 @@ export class RegisterUserDto {
   lastName: string
 
   @IsNotEmpty()
-  @IsString()
+  @IsEmail()
   email: string
 
   @IsNotEmpty()
