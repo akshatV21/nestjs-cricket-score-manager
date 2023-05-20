@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
 import { DatabaseModule, RmqModule, User, UserRepository, UserSchema } from '@lib/common'
 import { SERVICES } from '@lib/utils'
+import { UniqueEmailGuard } from './guards/unique-email.guard'
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { SERVICES } from '@lib/utils'
     DatabaseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository],
+  providers: [AuthService, UniqueEmailGuard, UserRepository],
 })
 export class AuthModule {}
