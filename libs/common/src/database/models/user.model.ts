@@ -19,6 +19,9 @@ export class User {
   @Prop({ required: true })
   password: string
 
+  @Prop({ default: false })
+  isEmailValidated: boolean
+
   @Prop({ required: true, type: String })
   type: UserType
 

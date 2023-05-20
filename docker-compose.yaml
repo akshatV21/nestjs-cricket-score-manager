@@ -12,6 +12,19 @@ services:
     env_file:
       - ./apps/auth/.env
 
+  notifications:
+    build:
+      context: .
+      dockerfile: ./apps/notifications/Dockerfile
+      target: development
+    command: npm run start:dev notifications
+    ports:
+      - '8081:8081'
+    volumes:
+      - .:/app
+    env_file:
+      - ./apps/notifications/.env
+
   mongo-server:
     image: mongo
     logging:
