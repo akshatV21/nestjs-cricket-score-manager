@@ -20,7 +20,7 @@ export class User {
   password: string
 
   @Prop({ default: false })
-  isEmailValidated: boolean
+  isEmailValidated?: boolean
 
   @Prop({ required: true, type: String })
   type: UserType

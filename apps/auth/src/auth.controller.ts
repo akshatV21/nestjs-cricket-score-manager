@@ -7,5 +7,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async httpRegisterUser(@Body() registerUserDto: RegisterUserDto) {}
+  async httpRegisterUser(@Body() registerUserDto: RegisterUserDto) {
+    await this.authService.register(registerUserDto)
+    return { success: true, message: 'User registered successfully' }
+  }
 }
