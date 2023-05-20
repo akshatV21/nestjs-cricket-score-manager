@@ -19,7 +19,7 @@ export class AuthService {
 
   async register(registerUserDto: RegisterUserDto) {
     const user = await this.UserRepository.create(registerUserDto)
-    const emailValidationToken = sign(user.id, this.configService.get('JWT_SECRET'), { expiresIn: '1h' })
+    const emailValidationToken = sign({ id: user.id }, this.configService.get('JWT_SECRET'), { expiresIn: '2h' })
     this.notificationsService.emit<any, UserRegisteredDto>(EVENTS.USER_REGISTERED, {
       token: emailValidationToken,
       email: user.email,
@@ -43,15 +43,15 @@ export class AuthService {
   }
 
   async validate(token: string) {
-    const userId = this.validateToken(token)
-    const user = await this.UserRepository.findById(new Types.ObjectId(userId))
+    const { id } = this.validateToken(token)
+    const user = await this.UserRepository.findById(new Types.ObjectId(id))
 
     user.isEmailValidated = true
     await user.save()
   }
 
   private validateToken(token: string): any {
-    return verify(token, 'secret', (err, payload) => {
+    return verify(token, this.configService.get('JWT_SECRET'), (err, payload) => {
       // when jwt is valid
       if (!err) return payload
 

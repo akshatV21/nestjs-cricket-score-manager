@@ -10,6 +10,6 @@ export class NotificationsController {
 
   @EventPattern(EVENTS.USER_REGISTERED)
   handleUserRegisteredEvent(@Payload() payload: UserRegisteredDto) {
-    this.notificationsService.sendValidationEmail(payload)
+    this.notificationsService.sendEmailVerificationMail(payload)
   }
 }
