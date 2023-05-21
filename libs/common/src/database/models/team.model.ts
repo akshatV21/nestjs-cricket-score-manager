@@ -25,6 +25,9 @@ export class Team {
 
   @Prop({ default: [], ref: 'Match' })
   upcomingMatches: Types.ObjectId[]
+
+  @Prop({ default: [], ref: 'Invitation' })
+  invitations: Types.ObjectId[]
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team)
