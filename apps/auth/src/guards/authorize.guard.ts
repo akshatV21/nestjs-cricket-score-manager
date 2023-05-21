@@ -1,4 +1,4 @@
-import { AuthorizeDto } from '@lib/utils'
+import { AuthorizeDto, EXCEPTION_MSGS } from '@lib/utils'
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { RpcException } from '@nestjs/microservices'
 import { AuthService } from '../auth.service'
@@ -16,16 +16,16 @@ export class Authorize implements CanActivate {
     const token = data.token
     const requestType = data.requestType
 
-    if (!token) throw new RpcException('No token provided')
+    if (!token) throw new RpcException(EXCEPTION_MSGS.NULL_TOKEN)
 
-    const { id } = this.authService.validateToken(token)
-
+    const { id } = this.authService.validateToken(token, 'rpc')
+    
     if (requestType === 'rpc') return true
 
     const user = await this.UserRepository.findById(new Types.ObjectId(id))
-
-    if (!user.isEmailValidated) throw new RpcException('Please validate for email first.')
-    if (!types.includes(user.type)) throw new RpcException('You are forbidden to make this request.')
+    
+    if (!user.isEmailValidated) throw new RpcException(EXCEPTION_MSGS.UNVERIFIED_EMAIL)
+    if (!types.includes(user.type)) throw new RpcException(EXCEPTION_MSGS.UNAUTHORIZED)
 
     data.user = user
     return true

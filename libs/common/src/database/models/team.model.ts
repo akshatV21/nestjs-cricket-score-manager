@@ -12,22 +12,25 @@ export class Team {
   manager: Types.ObjectId
 
   @Prop({ default: null, ref: 'User' })
-  scorer: Types.ObjectId
+  scorer?: Types.ObjectId
 
   @Prop({ default: [], ref: 'User' })
-  squad: Types.ObjectId[]
+  squad?: Types.ObjectId[]
 
   @Prop({ default: null, ref: 'Match' })
-  nextMatch: Types.ObjectId
+  nextMatch?: Types.ObjectId
 
   @Prop({ default: [], ref: 'Match' })
-  matchesPlayed: Types.ObjectId[]
+  matchesPlayed?: Types.ObjectId[]
 
   @Prop({ default: [], ref: 'Match' })
-  upcomingMatches: Types.ObjectId[]
+  upcomingMatches?: Types.ObjectId[]
 
   @Prop({ default: [], ref: 'Invitation' })
-  invitations: Types.ObjectId[]
+  invitations?: Types.ObjectId[]
+
+  @Prop({ default: [], ref: 'Statistic' })
+  statistics?: Types.ObjectId
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team)

@@ -28,7 +28,7 @@ export class User {
   @Prop({ default: null, ref: 'Team' })
   team?: Types.ObjectId
 
-  @Prop({ default: null, ref: 'Statistics' })
+  @Prop({ default: null, ref: 'Statistic' })
   statistics?: Types.ObjectId
 }
 

@@ -20,3 +20,11 @@ export const REQUEST_TYPEs = {
   RPC: 'rpc',
   WS: 'ws',
 } as const
+
+export const EXCEPTION_MSGS = {
+  NULL_TOKEN: 'TokenNotProvided',
+  UNAUTHORIZED: 'UnauthorizedAccess',
+  JWT_EXPIRED: 'JwtExpired',
+  INVALID_JWT: 'InvalidJwt',
+  UNVERIFIED_EMAIL: 'EmailNotVerified',
+} as const

@@ -12,8 +12,8 @@ import {
 export abstract class AbstractRepository<T extends Document, S extends Record<string, any>> {
   constructor(protected readonly AbstractModel: Model<T>) {}
 
-  async create(createDto: S): Promise<T> {
-    const entity = new this.AbstractModel(createDto)
+  async create(createDto: S, id: Types.ObjectId = new Types.ObjectId): Promise<T> {
+    const entity = new this.AbstractModel({ ...createDto, _id: id })
     return entity.save()
   }
 

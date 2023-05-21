@@ -3,9 +3,10 @@ import { TeamsController } from './teams.controller'
 import { TeamsService } from './teams.service'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
-import { Authorize, DatabaseModule, RmqModule } from '@lib/common'
+import { Authorize, DatabaseModule, RmqModule, Team, TeamSchema, User, UserRepository, UserSchema } from '@lib/common'
 import { SERVICES } from '@lib/utils'
 import { APP_GUARD } from '@nestjs/core'
+import { TeamRepository } from '@lib/common/database/repositories/team.repository'
 
 @Module({
   imports: [
@@ -22,8 +23,12 @@ import { APP_GUARD } from '@nestjs/core'
     }),
     RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE]),
     DatabaseModule,
+    DatabaseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Team.name, schema: TeamSchema },
+    ]),
   ],
   controllers: [TeamsController],
-  providers: [TeamsService, { provide: APP_GUARD, useClass: Authorize }],
+  providers: [TeamsService, { provide: APP_GUARD, useClass: Authorize }, UserRepository, TeamRepository],
 })
 export class TeamsModule {}

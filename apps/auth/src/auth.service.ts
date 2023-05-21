@@ -1,10 +1,10 @@
 import { UserRepository } from '@lib/common'
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, ContextType, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { RegisterUserDto } from './dtos/register-user.dto'
 import { sign, verify } from 'jsonwebtoken'
 import { ConfigService } from '@nestjs/config'
-import { EVENTS, SERVICES, UserRegisteredDto } from '@lib/utils'
-import { ClientProxy } from '@nestjs/microservices'
+import { EVENTS, EXCEPTION_MSGS, SERVICES, UserRegisteredDto } from '@lib/utils'
+import { ClientProxy, RpcException } from '@nestjs/microservices'
 import { LoginUserDto } from './dtos/login-user.dto'
 import { compareSync } from 'bcrypt'
 import { Types } from 'mongoose'
@@ -60,16 +60,19 @@ export class AuthService {
     })
   }
 
-  validateToken(token: string): any {
+  validateToken(token: string, type: ContextType = 'http'): any {
     return verify(token, this.configService.get('JWT_SECRET'), (err, payload) => {
       // when jwt is valid
       if (!err) return payload
 
       // when jwt has expired
-      if (err.name === 'TokenExpiredError') throw new UnauthorizedException('Token has expired')
+      if (err.name === 'TokenExpiredError' && type === 'http') throw new UnauthorizedException('Token has expired')
+      if (err.name === 'TokenExpiredError' && type === 'rpc') throw new RpcException(EXCEPTION_MSGS.JWT_EXPIRED)
 
       // throws error when jwt is malformed
-      throw new UnauthorizedException('Invalid Jwt token', 'InvalidToken')
+      throw type === 'http'
+        ? new UnauthorizedException('Invalid Jwt token', 'InvalidToken')
+        : new RpcException(EXCEPTION_MSGS.INVALID_JWT)
     })
   }
 }
