@@ -11,4 +11,5 @@ export const SERVICES = {
 
 export const EVENTS = {
   USER_REGISTERED: 'user-registered',
+  AUTHORIZE: 'authorize',
 } as const
