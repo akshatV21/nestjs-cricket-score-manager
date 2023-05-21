@@ -7,6 +7,7 @@ export const USER_TYPE = {
 export const SERVICES = {
   AUTH_SERVICE: 'AUTH',
   NOTIFICATIONS_SERVICE: 'NOTIFICATIONS',
+  TEAMS_SERVICE: 'TEAMS',
 } as const
 
 export const EVENTS = {

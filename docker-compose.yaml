@@ -11,6 +11,25 @@ services:
       - .:/app
     env_file:
       - ./apps/auth/.env
+    depends_on:
+      - mongo-server
+      - rmq-server
+
+  teams:
+    build:
+      context: .
+      dockerfile: ./apps/teams/Dockerfile
+      target: development
+    command: npm run start:dev teams
+    ports:
+      - '8082:8082'
+    volumes:
+      - .:/app
+    env_file:
+      - ./apps/teams/.env
+    depends_on:
+      - mongo-server
+      - rmq-server
 
   notifications:
     build:
@@ -24,6 +43,9 @@ services:
       - .:/app
     env_file:
       - ./apps/notifications/.env
+    depends_on:
+      - mongo-server
+      - rmq-server
 
   mongo-server:
     image: mongo
