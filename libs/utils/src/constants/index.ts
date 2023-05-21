@@ -13,3 +13,9 @@ export const EVENTS = {
   USER_REGISTERED: 'user-registered',
   AUTHORIZE: 'authorize',
 } as const
+
+export const REQUEST_TYPEs = {
+  HTTP: 'http',
+  RPC: 'rpc',
+  WS: 'ws',
+} as const

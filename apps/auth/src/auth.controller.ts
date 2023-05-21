@@ -4,6 +4,9 @@ import { RegisterUserDto } from './dtos/register-user.dto'
 import { LoginUserDto } from './dtos/login-user.dto'
 import { UniqueEmailGuard } from './guards/unique-email.guard'
 import { Auth } from '@lib/common'
+import { MessagePattern, Payload } from '@nestjs/microservices'
+import { AuthorizeDto, EVENTS } from '@lib/utils'
+import { Authorize } from './guards/authorize.guard'
 
 @Controller('auth')
 export class AuthController {
@@ -36,5 +39,11 @@ export class AuthController {
   async httpResendEmailVerificationMail(@Query('email') email: string) {
     await this.authService.resend(email)
     return { success: true, message: 'Email sent successfully.' }
+  }
+
+  @MessagePattern(EVENTS.AUTHORIZE)
+  @UseGuards(Authorize)
+  authorize(@Payload() payload: AuthorizeDto) {
+    return { user: payload.user }
   }
 }

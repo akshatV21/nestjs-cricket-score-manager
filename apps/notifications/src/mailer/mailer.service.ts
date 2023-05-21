@@ -6,7 +6,7 @@ import { UserRegisteredDto } from '@lib/utils'
 export class MailerService {
   constructor(private mailService: MailService) {}
 
-  async sendEmailVerificationMail({ email, name, token }: UserRegisteredDto) {
-    await this.mailService.sendMail({ to: email, text: `Hey ${name}, heres your email verification token - ${token}` })
+  async sendEmailVerificationMail({ email, name, jwt }: UserRegisteredDto) {
+    await this.mailService.sendMail({ to: email, text: `Hey ${name}, heres your email verification token - ${jwt}` })
   }
 }

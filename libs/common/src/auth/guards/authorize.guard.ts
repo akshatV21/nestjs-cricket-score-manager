@@ -10,8 +10,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { ClientProxy } from '@nestjs/microservices'
-import { Observable, lastValueFrom } from 'rxjs'
+import { ClientProxy, RpcException } from '@nestjs/microservices'
+import { lastValueFrom } from 'rxjs'
 
 @Injectable()
 export class Authorize implements CanActivate {
@@ -20,13 +20,14 @@ export class Authorize implements CanActivate {
     @Inject(SERVICES.AUTH_SERVICE) private readonly authService: ClientProxy,
   ) {}
 
-  async canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const type = context.getType()
 
     if (type === 'http') return this.authorizeHttpRequest(context)
+    else if (type === 'rpc') return this.authorizeRpcRequest(context)
   }
 
-  private async authorizeHttpRequest(context: ExecutionContext) {
+  private authorizeHttpRequest(context: ExecutionContext) {
     const { isLive, isOpen, types } = this.reflector.get<AuthOptions>('authOptions', context.getHandler())
 
     if (!isLive) throw new InternalServerErrorException('This endpoint is currently under maintainence.')
@@ -38,15 +39,30 @@ export class Authorize implements CanActivate {
 
     const token = authHeader.split(' ')[1]
 
+    return this.sendAuthorizationRequest({ token, types, requestType: 'http' }, request)
+  }
+
+  private authorizeRpcRequest(context: ExecutionContext) {
+    const { isLive, isOpen, types } = this.reflector.get<AuthOptions>('authOptions', context.getHandler())
+    
+    if (!isLive) throw new RpcException('This endpoint is currently under maintainence.')
+    if (isOpen) return true
+
+    const data = context.switchToRpc().getData()
+    const token = data.token
+
+    return this.sendAuthorizationRequest({ token, types, requestType: 'rpc' }, data)
+  }
+
+  private async sendAuthorizationRequest(authorizeDto: AuthorizeDto, request: any) {
     const { user } = await lastValueFrom(
-      this.authService.send<any, AuthorizeDto>(EVENTS.AUTHORIZE, { token, types }),
+      this.authService.send<any, AuthorizeDto>(EVENTS.AUTHORIZE, authorizeDto),
     ).catch(err => {
+      console.log(err)
       throw new ForbiddenException()
     })
 
     request.user = user
     return true
   }
-
-  private authorizeRpcRequest(context: ExecutionContext) {}
 }

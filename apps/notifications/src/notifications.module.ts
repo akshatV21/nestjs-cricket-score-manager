@@ -3,9 +3,10 @@ import { NotificationsController } from './notifications.controller'
 import { NotificationsService } from './notifications.service'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
-import { RmqModule } from '@lib/common'
+import { Authorize, RmqModule } from '@lib/common'
 import { SERVICES } from '@lib/utils'
 import { MailerModule } from './mailer/mailer.module';
+import { APP_GUARD } from '@nestjs/core'
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { MailerModule } from './mailer/mailer.module';
     MailerModule,
   ],
   controllers: [NotificationsController],
-  providers: [NotificationsService],
+  providers: [NotificationsService, { provide: APP_GUARD, useClass: Authorize }],
 })
 export class NotificationsModule {}

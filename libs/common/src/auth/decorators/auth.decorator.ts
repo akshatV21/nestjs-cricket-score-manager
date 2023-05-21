@@ -3,7 +3,7 @@ import { SetMetadata } from '@nestjs/common'
 
 export const Auth = (options?: AuthOptions) => {
   const metadata: AuthOptions = {
-    isLive: options?.isOpen ?? true,
+    isLive: options?.isLive ?? true,
     isOpen: options?.isOpen ?? false,
     types: options?.types ?? ['player'],
   }
