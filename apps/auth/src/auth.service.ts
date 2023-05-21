@@ -50,6 +50,16 @@ export class AuthService {
     await user.save()
   }
 
+  async resend(email: string) {
+    const user = await this.UserRepository.findOne({ email: email })
+    const emailValidationToken = sign({ id: user.id }, this.configService.get('JWT_SECRET'), { expiresIn: '2h' })
+    this.notificationsService.emit<any, UserRegisteredDto>(EVENTS.USER_REGISTERED, {
+      token: emailValidationToken,
+      email: user.email,
+      name: `${user.firstName} ${user.lastName}`,
+    })
+  }
+
   private validateToken(token: string): any {
     return verify(token, this.configService.get('JWT_SECRET'), (err, payload) => {
       // when jwt is valid

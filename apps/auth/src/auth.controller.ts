@@ -26,4 +26,10 @@ export class AuthController {
     await this.authService.validate(token)
     return { success: true, message: 'Email validated successfully.' }
   }
+
+  @Get('resend')
+  async httpResendEmailVerificationMail(@Query('email') email: string) {
+    await this.authService.resend(email)
+    return { success: true, message: 'Email sent successfully.' }
+  }
 }
