@@ -10,7 +10,7 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @EventPattern(EVENTS.USER_REGISTERED)
-  @Auth({ isOpen: false })
+  @Auth({ isOpen: true })
   @UseGuards(Authorize)
   handleUserRegisteredEvent(@Payload() payload: UserRegisteredDto) {
     this.notificationsService.sendEmailVerificationMail(payload)
