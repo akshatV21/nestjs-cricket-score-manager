@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common'
 import { TeamsService } from './teams.service'
 import { Auth, ReqUser, UserDocument } from '@lib/common'
 import { CreateTeamDto } from './dtos/create-team.dto'
@@ -17,6 +17,13 @@ export class TeamsController {
   async httpCreateTeam(@Body() createTeamDto: CreateTeamDto, @ReqUser() user: UserDocument) {
     const team = await this.teamsService.create(createTeamDto, user)
     return { success: true, message: 'Team created successfully.', data: { team } }
+  }
+
+  @Get()
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpListTeams(@Query('page', ParseIntPipe) page: number) {
+    const teams = await this.teamsService.list(page)
+    return { success: true, message: 'Team fetched successfully.', data: { teams, nextPage: page + 1 } }
   }
 
   @Get(':teamId')

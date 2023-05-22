@@ -41,3 +41,5 @@ export const REQUEST_STATUS = {
   DENIED: 'denied',
   UNANSWERED: 'answered',
 } as const
+
+export const TEAMS_PAGINATION_LIMIT = 5

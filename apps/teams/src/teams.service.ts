@@ -3,6 +3,7 @@ import { CreateTeamDto } from './dtos/create-team.dto'
 import { TeamDocument, UserDocument, UserRepository } from '@lib/common'
 import { TeamRepository } from '@lib/common/database/repositories/team.repository'
 import { ProjectionType, QueryOptions, Types } from 'mongoose'
+import { TEAMS_PAGINATION_LIMIT } from '@lib/utils'
 
 @Injectable()
 export class TeamsService {
@@ -31,8 +32,18 @@ export class TeamsService {
     return this.TeamRepository.findById(teamId, projections, options)
   }
 
-  async list(user: UserDocument) {
-    const type = user.type
-    // return teams
+  async list(page: number) {
+    const skip = (page - 1) * TEAMS_PAGINATION_LIMIT
+
+    // update this projection and add these: nextMatch, statistics
+    const projections: ProjectionType<TeamDocument> = { name: 1, manager: 1, scorer: 1 }
+    const options: QueryOptions<TeamDocument> = {
+      populate: { path: 'manager scorer', select: 'firstName lastName email' },
+      skip,
+      limit: TEAMS_PAGINATION_LIMIT,
+    }
+
+    const teams = await this.TeamRepository.find({}, projections, options)
+    return teams
   }
 }
