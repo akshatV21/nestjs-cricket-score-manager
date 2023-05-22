@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { ClientProxy, RpcException } from '@nestjs/microservices'
+import { Types } from 'mongoose'
 import { lastValueFrom } from 'rxjs'
 
 @Injectable()
@@ -23,7 +24,7 @@ export class Authorize implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const type = context.getType()
-    
+
     if (type === 'http') return this.authorizeHttpRequest(context)
     else if (type === 'rpc') return this.authorizeRpcRequest(context)
   }
@@ -37,9 +38,9 @@ export class Authorize implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const authHeader = request.headers['authorization']
     if (!authHeader) throw new UnauthorizedException('No authorization header provided')
-    
+
     const token = authHeader.split(' ')[1]
-    return this.sendAuthorizationRequest({ token, types, requestType: 'http' }, request, 'http')
+    return this.sendAuthorizationRequest({ token, types, RequestContextType: 'http' }, request, 'http')
   }
 
   private authorizeRpcRequest(context: ExecutionContext) {
@@ -51,7 +52,7 @@ export class Authorize implements CanActivate {
     const data = context.switchToRpc().getData()
     const token = data.token
 
-    return this.sendAuthorizationRequest({ token, types, requestType: 'rpc' }, data, 'rpc')
+    return this.sendAuthorizationRequest({ token, types, RequestContextType: 'rpc' }, data, 'rpc')
   }
 
   private async sendAuthorizationRequest(authorizeDto: AuthorizeDto, request: any, type: ContextType) {
@@ -77,13 +78,11 @@ export class Authorize implements CanActivate {
             ? new UnauthorizedException('Please verify your email first.')
             : new RpcException('Please verify your email first.')
         default:
-          throw type === 'http'
-            ? new UnauthorizedException('Invalid Jwt.')
-            : new RpcException('Invalid Jwt.')
-
+          throw type === 'http' ? new UnauthorizedException('Invalid Jwt.') : new RpcException('Invalid Jwt.')
       }
     })
-    
+
+    response.user._id = new Types.ObjectId(response.user._id)
     request.user = response.user
     return true
   }

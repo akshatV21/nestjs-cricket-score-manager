@@ -26,8 +26,8 @@ export class Team {
   @Prop({ default: [], ref: 'Match' })
   upcomingMatches?: Types.ObjectId[]
 
-  @Prop({ default: [], ref: 'Invitation' })
-  invitations?: Types.ObjectId[]
+  @Prop({ default: [], ref: 'Request' })
+  requests?: Types.ObjectId[]
 
   @Prop({ default: [], ref: 'Statistic' })
   statistics?: Types.ObjectId

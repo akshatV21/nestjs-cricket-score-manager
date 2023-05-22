@@ -1,12 +1,16 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { TeamsService } from './teams.service'
 import { Auth, ReqUser, UserDocument } from '@lib/common'
 import { CreateTeamDto } from './dtos/create-team.dto'
 import { Types } from 'mongoose'
+import { CreateRequestDto } from './dtos/create-request.dto'
+import { ParseObjectId } from '@lib/utils'
+import { RequestsService } from './requests/requests.service'
+import { UpdateRequestDto } from './dtos/update-request.dto'
 
 @Controller('teams')
 export class TeamsController {
-  constructor(private readonly teamsService: TeamsService) {}
+  constructor(private readonly teamsService: TeamsService, private readonly requestsService: RequestsService) {}
 
   @Post()
   @Auth({ types: ['manager'] })
@@ -17,8 +21,29 @@ export class TeamsController {
 
   @Get(':teamId')
   @Auth({ types: ['player', 'scorer', 'manager'] })
-  async httpGetTeamById(@Param('teamId') teamId: Types.ObjectId, @ReqUser() user: UserDocument) {
+  async httpGetTeamById(@Param('teamId', ParseObjectId) teamId: Types.ObjectId, @ReqUser() user: UserDocument) {
     const team = await this.teamsService.get(teamId, user)
     return { success: true, message: 'Team fetched successfully.', data: { team } }
+  }
+
+  @Post('requests')
+  @Auth({ types: ['manager'] })
+  async httpCreateRequest(@Body() createRequestDto: CreateRequestDto, @ReqUser() user: UserDocument) {
+    const request = await this.requestsService.create(createRequestDto, user)
+    return { success: true, message: 'Request created successfully', data: { request } }
+  }
+
+  @Patch('requests/accept')
+  @Auth({ types: ['player', 'scorer'] })
+  async httpAcceptRequest(@Body() updateRequestDto: UpdateRequestDto, @ReqUser() user: UserDocument) {
+    const request = await this.requestsService.accept(updateRequestDto, user)
+    return { success: true, message: 'Request accepted successfully', data: { request } }
+  }
+
+  @Patch('requests/deny')
+  @Auth({ types: ['player', 'scorer'] })
+  async httpDenyRequest(@Body() updateRequestDto: UpdateRequestDto, @ReqUser() user: UserDocument) {
+    const request = await this.requestsService.deny(updateRequestDto, user)
+    return { success: true, message: 'Request denied successfully', data: { request } }
   }
 }

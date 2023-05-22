@@ -30,6 +30,9 @@ export class User {
 
   @Prop({ default: null, ref: 'Statistic' })
   statistics?: Types.ObjectId
+
+  @Prop({ default: [], ref: 'Request' })
+  requests?: Types.ObjectId[]
 }
 
 const UserSchema = SchemaFactory.createForClass(User)

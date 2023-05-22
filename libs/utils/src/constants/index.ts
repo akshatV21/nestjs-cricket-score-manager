@@ -15,7 +15,7 @@ export const EVENTS = {
   AUTHORIZE: 'authorize',
 } as const
 
-export const REQUEST_TYPEs = {
+export const CONTEXT_TYPES = {
   HTTP: 'http',
   RPC: 'rpc',
   WS: 'ws',
@@ -27,4 +27,17 @@ export const EXCEPTION_MSGS = {
   JWT_EXPIRED: 'JwtExpired',
   INVALID_JWT: 'InvalidJwt',
   UNVERIFIED_EMAIL: 'EmailNotVerified',
+} as const
+
+export const REQUEST_TYPES = {
+  PLAYER: 'player-join-request',
+  SCORER: 'scorer-join-request',
+} as const
+
+export const SQUAD_LIMIT = 18
+
+export const REQUEST_STATUS = {
+  ACCEPTED: 'accepted',
+  DENIED: 'denied',
+  UNANSWERED: 'answered',
 } as const

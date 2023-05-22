@@ -1,6 +1,6 @@
 import { IsEnum, IsJWT, IsNotEmpty, IsOptional } from 'class-validator'
-import { RequestType, UserType } from '../types'
-import { REQUEST_TYPEs, USER_TYPE } from '../constants'
+import { RequestContextType, UserType } from '../types'
+import { CONTEXT_TYPES, USER_TYPE } from '../constants'
 import { UserDocument } from '@lib/common'
 
 export class AuthorizeDto {
@@ -13,8 +13,8 @@ export class AuthorizeDto {
   types: UserType[]
 
   @IsNotEmpty()
-  @IsEnum(REQUEST_TYPEs)
-  requestType: RequestType
+  @IsEnum(CONTEXT_TYPES)
+  RequestContextType: RequestContextType
 
   user?: UserDocument
 }

@@ -3,10 +3,23 @@ import { TeamsController } from './teams.controller'
 import { TeamsService } from './teams.service'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
-import { Authorize, DatabaseModule, RmqModule, Team, TeamSchema, User, UserRepository, UserSchema } from '@lib/common'
+import {
+  Authorize,
+  DatabaseModule,
+  Request,
+  RequestSchema,
+  RmqModule,
+  Team,
+  TeamSchema,
+  User,
+  UserRepository,
+  UserSchema,
+  TeamRepository,
+  RequestRepository,
+} from '@lib/common'
 import { SERVICES } from '@lib/utils'
 import { APP_GUARD } from '@nestjs/core'
-import { TeamRepository } from '@lib/common/database/repositories/team.repository'
+import { RequestsModule } from './requests/requests.module'
 
 @Module({
   imports: [
@@ -26,7 +39,9 @@ import { TeamRepository } from '@lib/common/database/repositories/team.repositor
     DatabaseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Team.name, schema: TeamSchema },
+      { name: Request.name, schema: RequestSchema },
     ]),
+    RequestsModule,
   ],
   controllers: [TeamsController],
   providers: [TeamsService, { provide: APP_GUARD, useClass: Authorize }, UserRepository, TeamRepository],
