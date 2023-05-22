@@ -31,7 +31,7 @@ export class AuthService {
     const registeredUser = await this.UserRepository.findOne({ email: loginUserDto.email }, {}, { lean: true })
     if (!registeredUser) throw new BadRequestException('No user with provided email.')
 
-    if (!registeredUser.isEmailValidated) throw new UnauthorizedException('Please validate your email first.')
+    // if (!registeredUser.isEmailValidated) throw new UnauthorizedException('Please validate your email first.')
 
     const passwordMatches = compareSync(loginUserDto.password, registeredUser.password)
     if (!passwordMatches) throw new BadRequestException('Invalid password provided.')

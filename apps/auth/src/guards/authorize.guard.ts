@@ -24,7 +24,7 @@ export class Authorize implements CanActivate {
 
     const user = await this.UserRepository.findById(new Types.ObjectId(id))
     
-    if (!user.isEmailValidated) throw new RpcException(EXCEPTION_MSGS.UNVERIFIED_EMAIL)
+    // if (!user.isEmailValidated) throw new RpcException(EXCEPTION_MSGS.UNVERIFIED_EMAIL)
     if (!types.includes(user.type)) throw new RpcException(EXCEPTION_MSGS.UNAUTHORIZED)
 
     data.user = user
