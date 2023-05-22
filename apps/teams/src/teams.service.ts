@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { CreateTeamDto } from './dtos/create-team.dto'
 import { TeamDocument, UserDocument, UserRepository } from '@lib/common'
 import { TeamRepository } from '@lib/common/database/repositories/team.repository'
@@ -13,11 +13,20 @@ export class TeamsService {
     if (user.team) throw new BadRequestException('You are already a manager of another team.')
 
     const teamObjectId = new Types.ObjectId()
-    const createTeamPromise = this.TeamRepository.create({ ...createTeamDto, manager: user._id }, teamObjectId)
-    const updateUserPromise = this.UserRepository.update(user._id, { $set: { team: teamObjectId } })
+    const session = await this.UserRepository.startTransaction()
 
-    const [team] = await Promise.all([createTeamPromise, updateUserPromise])
-    return team
+    try {
+      const createTeamPromise = this.TeamRepository.create({ ...createTeamDto, manager: user._id }, teamObjectId)
+      const updateUserPromise = this.UserRepository.update(user._id, { $set: { team: teamObjectId } })
+
+      const [team] = await Promise.all([createTeamPromise, updateUserPromise])
+      await session.commitTransaction()
+
+      return team
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
   }
 
   async get(teamId: Types.ObjectId, user: UserDocument) {

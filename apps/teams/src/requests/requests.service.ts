@@ -15,32 +15,40 @@ export class RequestsService {
 
   async create(createRequestDto: CreateRequestDto, user: UserDocument) {
     const teamId = new Types.ObjectId(user.team)
+    const session = await this.RequestRepository.startTransaction()
 
-    const getTeamPromise = this.TeamRepository.findById(teamId)
-    const getUserPromise = this.UserRepository.findById(createRequestDto.user)
+    try {
+      const getTeamPromise = this.TeamRepository.findById(teamId)
+      const getUserPromise = this.UserRepository.findById(createRequestDto.user)
 
-    const [team, toUser] = await Promise.all([getTeamPromise, getUserPromise])
+      const [team, toUser] = await Promise.all([getTeamPromise, getUserPromise])
 
-    if (team.squad.length >= SQUAD_LIMIT && createRequestDto.type === 'player-join-request')
-      throw new BadRequestException('Your squad already has 18 players.')
+      if (team.squad.length >= SQUAD_LIMIT && createRequestDto.type === 'player-join-request')
+        throw new BadRequestException('Your squad already has 18 players.')
 
-    if (team.scorer && createRequestDto.type === 'scorer-join-request')
-      throw new BadRequestException('Your team already has a scorer.')
+      if (team.scorer && createRequestDto.type === 'scorer-join-request')
+        throw new BadRequestException('Your team already has a scorer.')
 
-    if (createRequestDto.type === 'player-join-request' && toUser.type !== 'player')
-      throw new BadRequestException('The user you requested is not a player.')
+      if (createRequestDto.type === 'player-join-request' && toUser.type !== 'player')
+        throw new BadRequestException('The user you requested is not a player.')
 
-    if (createRequestDto.type === 'scorer-join-request' && toUser.type !== 'scorer')
-      throw new BadRequestException('The user you requested is not a scorer.')
+      if (createRequestDto.type === 'scorer-join-request' && toUser.type !== 'scorer')
+        throw new BadRequestException('The user you requested is not a scorer.')
 
-    const requestObjectId = new Types.ObjectId()
-    const createRequestPromise = this.RequestRepository.create({ ...createRequestDto, team: teamId }, requestObjectId)
+      const requestObjectId = new Types.ObjectId()
+      const createRequestPromise = this.RequestRepository.create({ ...createRequestDto, team: teamId }, requestObjectId)
 
-    team.requests.push(requestObjectId)
-    toUser.requests.push(requestObjectId)
+      team.requests.push(requestObjectId)
+      toUser.requests.push(requestObjectId)
 
-    const [request] = await Promise.all([createRequestPromise, team.save(), toUser.save()])
-    return request
+      const [request] = await Promise.all([createRequestPromise, team.save(), toUser.save()])
+      await session.commitTransaction()
+
+      return request
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
   }
 
   async accept({ request, response, team }: UpdateRequestDto, user: UserDocument) {
@@ -50,15 +58,23 @@ export class RequestsService {
     if (!requestExists) throw new ForbiddenException('You are forbidden to make this request.')
 
     const teamUpdateObject = user.type === 'player' ? { $push: { squad: user._id } } : { $set: { scorer: user._id } }
+    const session = await this.RequestRepository.startTransaction()
 
-    const updateRequestPromise = this.RequestRepository.update(request, {
-      $set: { status: REQUEST_STATUS.ACCEPTED, response },
-    })
-    const updateTeamPromise = this.TeamRepository.update(team, teamUpdateObject)
-    const updateUserPromise = this.UserRepository.update(user._id, { $set: { team: team } })
+    try {
+      const updateRequestPromise = this.RequestRepository.update(request, {
+        $set: { status: REQUEST_STATUS.ACCEPTED, response },
+      })
+      const updateTeamPromise = this.TeamRepository.update(team, teamUpdateObject)
+      const updateUserPromise = this.UserRepository.update(user._id, { $set: { team: team } })
 
-    const [req] = await Promise.all([updateRequestPromise, updateTeamPromise, updateUserPromise])
-    return req
+      const [req] = await Promise.all([updateRequestPromise, updateTeamPromise, updateUserPromise])
+      await session.commitTransaction()
+
+      return req
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
   }
 
   async deny({ request, response }: UpdateRequestDto, user: UserDocument) {
