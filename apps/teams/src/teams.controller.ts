@@ -23,7 +23,7 @@ export class TeamsController {
   @Auth({ types: ['player', 'scorer', 'manager'] })
   async httpListTeams(@Query('page', ParseIntPipe) page: number) {
     const teams = await this.teamsService.list(page)
-    return { success: true, message: 'Team fetched successfully.', data: { teams, nextPage: page + 1 } }
+    return { success: true, message: 'Teams fetched successfully.', data: { teams, nextPage: page + 1 } }
   }
 
   @Get(':teamId')
@@ -52,5 +52,22 @@ export class TeamsController {
   async httpDenyRequest(@Body() updateRequestDto: UpdateRequestDto, @ReqUser() user: UserDocument) {
     const request = await this.requestsService.deny(updateRequestDto, user)
     return { success: true, message: 'Request denied successfully', data: { request } }
+  }
+
+  @Get('requests')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpListRequests(@Query('page', ParseIntPipe) page: number, @ReqUser() user: UserDocument) {
+    const requests = await this.requestsService.list(page, user)
+    return { success: true, message: 'requests fetched successfully.', data: { requests, nextPage: page + 1 } }
+  }
+
+  @Get('requests/:requestId')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpGetRequestById(
+    @Param('requestId', ParseObjectId) requestId: Types.ObjectId,
+    @ReqUser() user: UserDocument,
+  ) {
+    const request = await this.requestsService.get(requestId, user)
+    return { success: true, message: 'Requests fetched successfully.', data: { request } }
   }
 }

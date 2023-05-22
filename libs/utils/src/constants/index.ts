@@ -43,3 +43,4 @@ export const REQUEST_STATUS = {
 } as const
 
 export const TEAMS_PAGINATION_LIMIT = 5
+export const REQUESTS_PAGINATION_LIMIT = 5
