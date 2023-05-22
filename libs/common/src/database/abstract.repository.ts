@@ -1,4 +1,5 @@
 import {
+  Connection,
   Document,
   FilterQuery,
   Model,
@@ -10,7 +11,7 @@ import {
 } from 'mongoose'
 
 export abstract class AbstractRepository<T extends Document, S extends Record<string, any>> {
-  constructor(protected readonly AbstractModel: Model<T>) {}
+  constructor(protected readonly AbstractModel: Model<T>, private readonly connection: Connection) {}
 
   async create(createDto: S, id: Types.ObjectId = new Types.ObjectId()): Promise<T> {
     const entity = new this.AbstractModel({ ...createDto, _id: id })
@@ -31,5 +32,11 @@ export abstract class AbstractRepository<T extends Document, S extends Record<st
 
   async update(id: string | Types.ObjectId, updateDto: UpdateQuery<T>) {
     return this.AbstractModel.findByIdAndUpdate(id, updateDto, { new: true })
+  }
+
+  async startTransaction() {
+    const session = await this.connection.startSession()
+    session.startTransaction()
+    return session
   }
 }
