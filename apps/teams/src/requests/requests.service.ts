@@ -14,6 +14,7 @@ import {
 } from '@lib/utils'
 import { UpdateRequestDto } from '../dtos/update-request.dto'
 import { ClientProxy } from '@nestjs/microservices'
+import { string } from 'joi'
 
 @Injectable()
 export class RequestsService {
@@ -55,7 +56,18 @@ export class RequestsService {
       const [request] = await Promise.all([createRequestPromise, team.save(), toUser.save()])
       await session.commitTransaction()
 
-      this.notificationsService.emit<any, RequestCreatedDto>(EVENTS.REQUEST_CREATED, { request, token })
+      const payload: RequestCreatedDto = {
+        body: {
+          userId: toUser._id,
+          userEmail: toUser.email,
+          teamName: team.name,
+          requestId: requestObjectId,
+          requestType: createRequestDto.type,
+        },
+        token,
+      }
+
+      this.notificationsService.emit<any, RequestCreatedDto>(EVENTS.REQUEST_CREATED, payload)
       return request
     } catch (error) {
       await session.abortTransaction()
@@ -79,10 +91,21 @@ export class RequestsService {
       const updateTeamPromise = this.TeamRepository.update(team, teamUpdateObject)
       const updateUserPromise = this.UserRepository.update(user._id, { $set: { team: team } })
 
-      const [req] = await Promise.all([updateRequestPromise, updateTeamPromise, updateUserPromise])
+      const [req, teamDoc, userDoc] = await Promise.all([updateRequestPromise, updateTeamPromise, updateUserPromise])
       await session.commitTransaction()
 
-      this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, { request: req, token })
+      const payload: RequestAcceptedDto = {
+        body: {
+          managerId: teamDoc.manager,
+          userName: `${userDoc.firstName} ${userDoc.lastName}`,
+          teamName: teamDoc.name,
+          requestId: request,
+          requestType: req.type,
+        },
+        token,
+      }
+
+      this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, payload)
       return req
     } catch (error) {
       await session.abortTransaction()
@@ -90,13 +113,29 @@ export class RequestsService {
     }
   }
 
-  async deny({ request, response }: UpdateRequestDto, user: UserDocument, token: string) {
+  async deny({ request, response, team }: UpdateRequestDto, user: UserDocument, token: string) {
     const requestExists = user.requests.includes(request)
     if (!requestExists) throw new ForbiddenException('You are forbidden to make this request.')
 
-    const req = await this.RequestRepository.update(request, { $set: { status: REQUEST_STATUS.DENIED, response } })
-    this.notificationsService.emit<any, RequestDeniedDto>(EVENTS.REQUEST_DENIED, { request: req, token })
+    const getTeamPromise = this.TeamRepository.findById(team)
+    const updateRequestPromise = this.RequestRepository.update(request, {
+      $set: { status: REQUEST_STATUS.DENIED, response },
+    })
 
+    const [req, teamDoc] = await Promise.all([updateRequestPromise, getTeamPromise])
+
+    const payload: RequestDeniedDto = {
+      body: {
+        requestId: req._id,
+        requestType: req.type,
+        userName: `${user.firstName} ${user.lastName}`,
+        teamName: teamDoc.name,
+        managerId: teamDoc.manager,
+      },
+      token,
+    }
+
+    this.notificationsService.emit<any, RequestDeniedDto>(EVENTS.REQUEST_DENIED, payload)
     return req
   }
 

@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io'
-import { UserType } from '../types'
+import { RequestType, UserType } from '../types'
 import { RequestDocument } from '@lib/common'
+import { Types } from 'mongoose'
 
 export interface AuthOptions {
   isLive?: boolean
@@ -12,11 +13,36 @@ export interface AuthenticatedSocket extends Socket {
   entityId?: string
 }
 
-export interface RequestCreatedDto {
-  request: RequestDocument
+interface BaseDto {
   token: string
 }
 
-export interface RequestAcceptedDto extends RequestCreatedDto {}
+export interface RequestCreatedDto extends BaseDto {
+  body: {
+    userId: string | Types.ObjectId
+    userEmail: string
+    teamName: string
+    requestId: string | Types.ObjectId
+    requestType: RequestType
+  }
+}
 
-export interface RequestDeniedDto extends RequestCreatedDto {}
+export interface RequestAcceptedDto extends BaseDto {
+  body: {
+    managerId: string | Types.ObjectId
+    userName: string
+    teamName: string
+    requestId: string | Types.ObjectId
+    requestType: RequestType
+  }
+}
+
+export interface RequestDeniedDto extends BaseDto {
+  body: {
+    managerId: string | Types.ObjectId
+    userName: string
+    teamName: string
+    requestId: string | Types.ObjectId
+    requestType: RequestType
+  }
+}

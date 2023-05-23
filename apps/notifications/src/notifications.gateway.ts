@@ -57,28 +57,28 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
 
   @OnEvent(EVENTS.REQUEST_CREATED)
   handleRequestCreatedEvent(data: RequestCreatedDto) {
-    const { request } = data
-    const socket = this.socketSessions.getSocket(request.user)
+    const { body } = data
+    const socket = this.socketSessions.getSocket(body.userId)
 
-    if (socket) socket.emit(EVENTS.REQUEST_CREATED, request)
-    else this.mailerService.sendRequestCreatedMail(request)
+    if (socket) socket.emit(EVENTS.REQUEST_CREATED, body)
+    else this.mailerService.sendRequestCreatedMail(data)
   }
 
   @OnEvent(EVENTS.REQUEST_ACCEPTED)
-  handleRequestAcceptedEvent(data: RequestAcceptedDto) {
-    const { request } = data
-    const socket = this.socketSessions.getSocket(request.user)
+  async handleRequestAcceptedEvent(data: RequestAcceptedDto) {
+    const { body } = data
+    const socket = this.socketSessions.getSocket(body.managerId)
 
-    if (socket) socket.emit(EVENTS.REQUEST_ACCEPTED, request)
-    // else this.mailerService.sendRequestCreatedMail(request)
+    if (socket) socket.emit(EVENTS.REQUEST_ACCEPTED, body)
+    else this.mailerService.sendRequestAcceptedMail(data)
   }
 
   @OnEvent(EVENTS.REQUEST_DENIED)
   handleRequestDeniedEvent(data: RequestDeniedDto) {
-    const { request } = data
-    const socket = this.socketSessions.getSocket(request.user)
+    const { body } = data
+    const socket = this.socketSessions.getSocket(body.managerId)
 
-    if (socket) socket.emit(EVENTS.REQUEST_DENIED, request)
-    // else this.mailerService.sendRequestCreatedMail(request)
+    if (socket) socket.emit(EVENTS.REQUEST_DENIED, body)
+    else this.mailerService.sendRequestDeniedMail(data)
   }
 }
