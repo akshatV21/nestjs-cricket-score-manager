@@ -1,10 +1,19 @@
 import { RequestDocument, RequestRepository, TeamRepository, UserDocument, UserRepository } from '@lib/common'
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { CreateRequestDto } from '../dtos/create-request.dto'
 import { FilterQuery, QueryOptions, Types } from 'mongoose'
-import { REQUESTS_PAGINATION_LIMIT, REQUEST_STATUS, SQUAD_LIMIT } from '@lib/utils'
+import {
+  EVENTS,
+  REQUESTS_PAGINATION_LIMIT,
+  REQUEST_STATUS,
+  RequestAcceptedDto,
+  RequestCreatedDto,
+  RequestDeniedDto,
+  SERVICES,
+  SQUAD_LIMIT,
+} from '@lib/utils'
 import { UpdateRequestDto } from '../dtos/update-request.dto'
-import { skip } from 'rxjs'
+import { ClientProxy } from '@nestjs/microservices'
 
 @Injectable()
 export class RequestsService {
@@ -12,9 +21,10 @@ export class RequestsService {
     private readonly RequestRepository: RequestRepository,
     private readonly UserRepository: UserRepository,
     private readonly TeamRepository: TeamRepository,
+    @Inject(SERVICES.NOTIFICATIONS_SERVICE) private readonly notificationsService: ClientProxy,
   ) {}
 
-  async create(createRequestDto: CreateRequestDto, user: UserDocument) {
+  async create(createRequestDto: CreateRequestDto, user: UserDocument, token: string) {
     const teamId = new Types.ObjectId(user.team)
     const session = await this.RequestRepository.startTransaction()
 
@@ -45,6 +55,7 @@ export class RequestsService {
       const [request] = await Promise.all([createRequestPromise, team.save(), toUser.save()])
       await session.commitTransaction()
 
+      this.notificationsService.emit<any, RequestCreatedDto>(EVENTS.REQUEST_CREATED, { request, token })
       return request
     } catch (error) {
       await session.abortTransaction()
@@ -52,7 +63,7 @@ export class RequestsService {
     }
   }
 
-  async accept({ request, response, team }: UpdateRequestDto, user: UserDocument) {
+  async accept({ request, response, team }: UpdateRequestDto, user: UserDocument, token: string) {
     if (user.team) throw new BadRequestException('You are already in team.')
 
     const requestExists = user.requests.includes(request)
@@ -71,6 +82,7 @@ export class RequestsService {
       const [req] = await Promise.all([updateRequestPromise, updateTeamPromise, updateUserPromise])
       await session.commitTransaction()
 
+      this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, { request: req, token })
       return req
     } catch (error) {
       await session.abortTransaction()
@@ -78,11 +90,13 @@ export class RequestsService {
     }
   }
 
-  async deny({ request, response }: UpdateRequestDto, user: UserDocument) {
+  async deny({ request, response }: UpdateRequestDto, user: UserDocument, token: string) {
     const requestExists = user.requests.includes(request)
     if (!requestExists) throw new ForbiddenException('You are forbidden to make this request.')
 
     const req = await this.RequestRepository.update(request, { $set: { status: REQUEST_STATUS.DENIED, response } })
+    this.notificationsService.emit<any, RequestDeniedDto>(EVENTS.REQUEST_DENIED, { request: req, token })
+
     return req
   }
 

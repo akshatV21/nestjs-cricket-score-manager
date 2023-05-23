@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { MailerModule as MailModule } from '@nestjs-modules/mailer'
 import { MailerService } from './mailer.service'
 import { ConfigService } from '@nestjs/config'
+import { DatabaseModule, Request, RequestRepository, RequestSchema, Team, TeamRepository, TeamSchema, User, UserRepository, UserSchema } from '@lib/common'
 
 @Module({
   imports: [
@@ -21,9 +22,14 @@ import { ConfigService } from '@nestjs/config'
       }),
       inject: [ConfigService],
     }),
+    DatabaseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Team.name, schema: TeamSchema },
+      { name: Request.name, schema: RequestSchema },
+    ]),
   ],
   controllers: [],
-  providers: [MailerService],
+  providers: [MailerService, UserRepository, TeamRepository, RequestRepository],
   exports: [MailerService],
 })
 export class MailerModule {}

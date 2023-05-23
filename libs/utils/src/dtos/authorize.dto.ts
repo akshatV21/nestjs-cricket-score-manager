@@ -14,7 +14,9 @@ export class AuthorizeDto {
 
   @IsNotEmpty()
   @IsEnum(CONTEXT_TYPES)
-  RequestContextType: RequestContextType
+  requestContextType: RequestContextType
 
   user?: UserDocument
+
+  userId?: string
 }

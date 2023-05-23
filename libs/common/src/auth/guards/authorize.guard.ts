@@ -1,5 +1,5 @@
 import { UserDocument } from '@lib/common/database'
-import { AuthOptions, AuthorizeDto, EVENTS, EXCEPTION_MSGS, SERVICES } from '@lib/utils'
+import { AuthOptions, AuthorizeDto, EVENTS, EXCEPTION_MSGS, SERVICES, catchAuthErrors } from '@lib/utils'
 import {
   CanActivate,
   ContextType,
@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { ClientProxy, RpcException } from '@nestjs/microservices'
+import { WsException } from '@nestjs/websockets'
 import { Types } from 'mongoose'
 import { lastValueFrom } from 'rxjs'
 
@@ -24,9 +25,10 @@ export class Authorize implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const type = context.getType()
-
+    console.log(type)
     if (type === 'http') return this.authorizeHttpRequest(context)
     else if (type === 'rpc') return this.authorizeRpcRequest(context)
+    else if (type === 'ws') return this.authorizeWsRequest(context)
   }
 
   private authorizeHttpRequest(context: ExecutionContext) {
@@ -40,7 +42,7 @@ export class Authorize implements CanActivate {
     if (!authHeader) throw new UnauthorizedException('No authorization header provided')
 
     const token = authHeader.split(' ')[1]
-    return this.sendAuthorizationRequest({ token, types, RequestContextType: 'http' }, request, 'http')
+    return this.sendAuthorizationRequest({ token, types, requestContextType: 'http' }, request, 'http')
   }
 
   private authorizeRpcRequest(context: ExecutionContext) {
@@ -52,38 +54,35 @@ export class Authorize implements CanActivate {
     const data = context.switchToRpc().getData()
     const token = data.token
 
-    return this.sendAuthorizationRequest({ token, types, RequestContextType: 'rpc' }, data, 'rpc')
+    return this.sendAuthorizationRequest({ token, types, requestContextType: 'rpc' }, data, 'rpc')
+  }
+
+  private authorizeWsRequest(context: ExecutionContext) {
+    const { isLive, isOpen, types } = this.reflector.get<AuthOptions>('authOptions', context.getHandler())
+
+    if (!isLive) throw new WsException('This endpoint is currently under maintainence.')
+    if (isOpen) return true
+
+    const request = context.switchToWs().getClient()
+    const token = request.handshake.auth.token
+
+    return this.sendAuthorizationRequest({ token, types, requestContextType: 'ws' }, request, 'ws')
   }
 
   private async sendAuthorizationRequest(authorizeDto: AuthorizeDto, request: any, type: ContextType) {
     const response = await lastValueFrom(
       this.authService.send<any, AuthorizeDto>(EVENTS.AUTHORIZE, authorizeDto),
     ).catch(err => {
-      console.log(err)
-      switch (err.message) {
-        case EXCEPTION_MSGS.NULL_TOKEN:
-          throw type === 'http'
-            ? new UnauthorizedException('Please log in first.')
-            : new RpcException('Please log in first.')
-        case EXCEPTION_MSGS.UNAUTHORIZED:
-          throw type === 'http'
-            ? new ForbiddenException('You are not authorized to access this endpoint.')
-            : new RpcException('You are not authorized to access this endpoint.')
-        case EXCEPTION_MSGS.JWT_EXPIRED:
-          throw type === 'http'
-            ? new UnauthorizedException('You token has expired. Please log in again.')
-            : new RpcException('You token has expired. Please log in again.')
-        case EXCEPTION_MSGS.UNVERIFIED_EMAIL:
-          throw type === 'http'
-            ? new UnauthorizedException('Please verify your email first.')
-            : new RpcException('Please verify your email first.')
-        default:
-          throw type === 'http' ? new UnauthorizedException('Invalid Jwt.') : new RpcException('Invalid Jwt.')
-      }
+      catchAuthErrors(err, type)
     })
 
-    response.user._id = new Types.ObjectId(response.user._id)
-    request.user = response.user
+    if (type === 'ws') {
+      request.entityId = response.userId
+    } else if (type === 'http') {
+      response.user._id = new Types.ObjectId(response.user._id)
+      request.user = response.user
+      request.token = authorizeDto.token
+    }
     return true
   }
 }

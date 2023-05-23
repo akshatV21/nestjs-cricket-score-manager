@@ -14,13 +14,17 @@ export class Authorize implements CanActivate {
 
     const types = data.types
     const token = data.token
-    const RequestContextType = data.RequestContextType
+    const requestContextType = data.requestContextType
 
     if (!token) throw new RpcException(EXCEPTION_MSGS.NULL_TOKEN)
 
     const { id } = this.authService.validateToken(token, 'rpc')
 
-    if (RequestContextType === 'rpc') return true
+    if (requestContextType === 'rpc') return true
+    if (requestContextType === 'ws') {
+      data.userId = id
+      return true
+    }
 
     const user = await this.UserRepository.findById(new Types.ObjectId(id))
 

@@ -7,6 +7,7 @@ import { CreateRequestDto } from './dtos/create-request.dto'
 import { ParseObjectId } from '@lib/utils'
 import { RequestsService } from './requests/requests.service'
 import { UpdateRequestDto } from './dtos/update-request.dto'
+import { Token } from '@lib/common/auth/decorators/token.decorator'
 
 @Controller('teams')
 export class TeamsController {
@@ -35,22 +36,34 @@ export class TeamsController {
 
   @Post('requests')
   @Auth({ types: ['manager'] })
-  async httpCreateRequest(@Body() createRequestDto: CreateRequestDto, @ReqUser() user: UserDocument) {
-    const request = await this.requestsService.create(createRequestDto, user)
+  async httpCreateRequest(
+    @Body() createRequestDto: CreateRequestDto,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    const request = await this.requestsService.create(createRequestDto, user, token)
     return { success: true, message: 'Request created successfully', data: { request } }
   }
 
   @Patch('requests/accept')
   @Auth({ types: ['player', 'scorer'] })
-  async httpAcceptRequest(@Body() updateRequestDto: UpdateRequestDto, @ReqUser() user: UserDocument) {
-    const request = await this.requestsService.accept(updateRequestDto, user)
+  async httpAcceptRequest(
+    @Body() updateRequestDto: UpdateRequestDto,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    const request = await this.requestsService.accept(updateRequestDto, user, token)
     return { success: true, message: 'Request accepted successfully', data: { request } }
   }
 
   @Patch('requests/deny')
   @Auth({ types: ['player', 'scorer'] })
-  async httpDenyRequest(@Body() updateRequestDto: UpdateRequestDto, @ReqUser() user: UserDocument) {
-    const request = await this.requestsService.deny(updateRequestDto, user)
+  async httpDenyRequest(
+    @Body() updateRequestDto: UpdateRequestDto,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    const request = await this.requestsService.deny(updateRequestDto, user, token)
     return { success: true, message: 'Request denied successfully', data: { request } }
   }
 

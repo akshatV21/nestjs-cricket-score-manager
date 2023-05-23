@@ -39,6 +39,7 @@ services:
     command: npm run start:dev notifications
     ports:
       - '8081:8081'
+      - '8084:8084'
     volumes:
       - .:/app
     env_file:

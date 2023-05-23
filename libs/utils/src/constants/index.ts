@@ -13,6 +13,9 @@ export const SERVICES = {
 export const EVENTS = {
   USER_REGISTERED: 'user-registered',
   AUTHORIZE: 'authorize',
+  REQUEST_CREATED: 'request-created',
+  REQUEST_ACCEPTED: 'request-accepted',
+  REQUEST_DENIED: 'request-denied',
 } as const
 
 export const CONTEXT_TYPES = {

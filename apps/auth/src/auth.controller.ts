@@ -44,6 +44,6 @@ export class AuthController {
   @MessagePattern(EVENTS.AUTHORIZE)
   @UseGuards(Authorize)
   authorize(@Payload() payload: AuthorizeDto) {
-    return { user: payload.user }
+    return { user: payload.user, userId: payload.userId }
   }
 }
