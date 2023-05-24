@@ -8,6 +8,8 @@ import { ParseObjectId } from '@lib/utils'
 import { RequestsService } from './requests/requests.service'
 import { UpdateRequestDto } from './dtos/update-request.dto'
 import { Token } from '@lib/common/auth/decorators/token.decorator'
+import { RemovePlayerDto } from './dtos/remove-player.dto'
+import { RemoveScorerDto } from './dtos/remove-scorer.dto'
 
 @Controller('teams')
 export class TeamsController {
@@ -32,6 +34,28 @@ export class TeamsController {
   async httpGetTeamById(@Param('teamId', ParseObjectId) teamId: Types.ObjectId, @ReqUser() user: UserDocument) {
     const team = await this.teamsService.get(teamId, user)
     return { success: true, message: 'Team fetched successfully.', data: { team } }
+  }
+
+  @Patch('remove/player')
+  @Auth({ types: ['manager'] })
+  async httpRemovePlayer(
+    @Body() removePlayerDto: RemovePlayerDto,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    await this.teamsService.removePlayer(removePlayerDto, user, token)
+    return { success: true, message: 'Player was successfully removed.' }
+  }
+
+  @Patch('remove/scorer')
+  @Auth({ types: ['manager'] })
+  async httpRemoveScorer(
+    @Body() removeScorerDto: RemoveScorerDto,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    await this.teamsService.removeScorer(removeScorerDto, user, token)
+    return { success: true, message: 'Scorer was successfully removed.' }
   }
 
   @Post('requests')

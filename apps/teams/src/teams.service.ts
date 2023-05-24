@@ -4,6 +4,8 @@ import { TeamDocument, UserDocument, UserRepository } from '@lib/common'
 import { TeamRepository } from '@lib/common/database/repositories/team.repository'
 import { ProjectionType, QueryOptions, Types } from 'mongoose'
 import { TEAMS_PAGINATION_LIMIT } from '@lib/utils'
+import { RemovePlayerDto } from './dtos/remove-player.dto'
+import { RemoveScorerDto } from './dtos/remove-scorer.dto'
 
 @Injectable()
 export class TeamsService {
@@ -54,5 +56,35 @@ export class TeamsService {
 
     const teams = await this.TeamRepository.find({}, projections, options)
     return teams
+  }
+
+  async removePlayer({ playerId }: RemovePlayerDto, user: UserDocument, token: string) {
+    const session = await this.TeamRepository.startTransaction()
+
+    try {
+      const updateTeamPromise = this.TeamRepository.update(user.team, { $pull: { squad: playerId } })
+      const updatePlayerPromise = this.UserRepository.update(playerId, { $set: { team: null } })
+
+      await Promise.all([updateTeamPromise, updatePlayerPromise])
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
+  }
+
+  async removeScorer({ scorerId }: RemoveScorerDto, user: UserDocument, token: string) {
+    const session = await this.TeamRepository.startTransaction()
+
+    try {
+      const updateTeamPromise = this.TeamRepository.update(user.team, { $set: { scorer: null } })
+      const updateScorerPromise = this.UserRepository.update(scorerId, { $set: { team: null } })
+
+      await Promise.all([updateTeamPromise, updateScorerPromise])
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
   }
 }
