@@ -17,8 +17,8 @@ export class TeamsController {
 
   @Post()
   @Auth({ types: ['manager'] })
-  async httpCreateTeam(@Body() createTeamDto: CreateTeamDto, @ReqUser() user: UserDocument) {
-    const team = await this.teamsService.create(createTeamDto, user)
+  async httpCreateTeam(@Body() createTeamDto: CreateTeamDto, @ReqUser() user: UserDocument, @Token() token: string) {
+    const team = await this.teamsService.create(createTeamDto, user, token)
     return { success: true, message: 'Team created successfully.', data: { team } }
   }
 

@@ -1,18 +1,23 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { CreateTeamDto } from './dtos/create-team.dto'
 import { TeamDocument, UserDocument, UserRepository } from '@lib/common'
 import { TeamRepository } from '@lib/common/database/repositories/team.repository'
 import { ProjectionType, QueryOptions, Types } from 'mongoose'
-import { TEAMS_PAGINATION_LIMIT } from '@lib/utils'
+import { EVENTS, SERVICES, TEAMS_PAGINATION_LIMIT, TeamCreatedDto } from '@lib/utils'
 import { RemovePlayerDto } from './dtos/remove-player.dto'
 import { RemoveScorerDto } from './dtos/remove-scorer.dto'
 import { UpdateNameDto } from './dtos/update-name.dto'
+import { ClientProxy } from '@nestjs/microservices'
 
 @Injectable()
 export class TeamsService {
-  constructor(private readonly TeamRepository: TeamRepository, private readonly UserRepository: UserRepository) {}
+  constructor(
+    private readonly TeamRepository: TeamRepository,
+    private readonly UserRepository: UserRepository,
+    @Inject(SERVICES.CHATS_SERVICE) private readonly ChatsService: ClientProxy,
+  ) {}
 
-  async create(createTeamDto: CreateTeamDto, user: UserDocument) {
+  async create(createTeamDto: CreateTeamDto, user: UserDocument, token: string) {
     if (user.team) throw new BadRequestException('You are already a manager of another team.')
 
     const teamObjectId = new Types.ObjectId()
@@ -25,6 +30,12 @@ export class TeamsService {
       const [team] = await Promise.all([createTeamPromise, updateUserPromise])
       await session.commitTransaction()
 
+      const payload: TeamCreatedDto = {
+        body: { teamId: teamObjectId, managerId: user._id },
+        token,
+      }
+
+      this.ChatsService.emit<any, TeamCreatedDto>(EVENTS.TEAM_CREATED, payload)
       return team
     } catch (error) {
       await session.abortTransaction()

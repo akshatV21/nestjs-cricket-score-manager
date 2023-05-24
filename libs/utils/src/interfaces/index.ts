@@ -46,3 +46,10 @@ export interface RequestDeniedDto extends BaseDto {
     requestType: RequestType
   }
 }
+
+export interface TeamCreatedDto extends BaseDto {
+  body: {
+    teamId: string | Types.ObjectId
+    managerId: string | Types.ObjectId
+  }
+}
