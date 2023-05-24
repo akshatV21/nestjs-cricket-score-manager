@@ -31,6 +31,22 @@ services:
       - mongo-server
       - rmq-server
 
+  chats:
+    build:
+      context: .
+      dockerfile: ./apps/chats/Dockerfile
+      target: development
+    command: npm run start:dev chats
+    ports:
+      - '8083:8083'
+    volumes:
+      - .:/app
+    env_file:
+      - ./apps/chats/.env
+    depends_on:
+      - mongo-server
+      - rmq-server
+
   notifications:
     build:
       context: .
