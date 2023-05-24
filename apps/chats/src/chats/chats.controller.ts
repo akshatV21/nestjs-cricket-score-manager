@@ -1,8 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common'
 import { ChatsService } from './chats.service'
-import { Auth, ReqUser, UserDocument } from '@lib/common'
+import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateChatDto } from './dtos/create-chat.dto'
-import { Token } from '@lib/common/auth/decorators/token.decorator'
 
 @Controller('chats')
 export class ChatsController {
