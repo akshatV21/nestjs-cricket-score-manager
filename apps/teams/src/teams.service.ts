@@ -6,6 +6,7 @@ import { ProjectionType, QueryOptions, Types } from 'mongoose'
 import { TEAMS_PAGINATION_LIMIT } from '@lib/utils'
 import { RemovePlayerDto } from './dtos/remove-player.dto'
 import { RemoveScorerDto } from './dtos/remove-scorer.dto'
+import { UpdateNameDto } from './dtos/update-name.dto'
 
 @Injectable()
 export class TeamsService {
@@ -86,5 +87,9 @@ export class TeamsService {
       await session.abortTransaction()
       throw error
     }
+  }
+
+  async updateName({ name }: UpdateNameDto, user: UserDocument) {
+    await this.TeamRepository.update(user.team, { $set: { name } })
   }
 }

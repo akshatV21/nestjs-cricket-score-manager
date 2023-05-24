@@ -10,6 +10,7 @@ import { UpdateRequestDto } from './dtos/update-request.dto'
 import { Token } from '@lib/common/auth/decorators/token.decorator'
 import { RemovePlayerDto } from './dtos/remove-player.dto'
 import { RemoveScorerDto } from './dtos/remove-scorer.dto'
+import { UpdateNameDto } from './dtos/update-name.dto'
 
 @Controller('teams')
 export class TeamsController {
@@ -34,6 +35,13 @@ export class TeamsController {
   async httpGetTeamById(@Param('teamId', ParseObjectId) teamId: Types.ObjectId, @ReqUser() user: UserDocument) {
     const team = await this.teamsService.get(teamId, user)
     return { success: true, message: 'Team fetched successfully.', data: { team } }
+  }
+
+  @Patch('name')
+  @Auth({ types: ['manager'] })
+  async httpUpdateTeamName(@Body() updateNameDto: UpdateNameDto, @ReqUser() user: UserDocument) {
+    await this.teamsService.updateName(updateNameDto, user)
+    return { success: true, message: 'Team name was successfully changed.' }
   }
 
   @Patch('remove/player')
