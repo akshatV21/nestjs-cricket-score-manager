@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateChatDto } from './dtos/create-chat.dto'
 import { ChatRepository, TeamRepository, UserDocument, UserRepository } from '@lib/common'
 import { Types } from 'mongoose'
-import { TeamCreatedDto } from '@lib/utils'
+import { TeamCreatedDto, UserAddedToTeamDto } from '@lib/utils'
 
 @Injectable()
 export class ChatsService {
@@ -52,6 +52,23 @@ export class ChatsService {
       await session.commitTransaction()
 
       return chat
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
+  }
+
+  async addUserToTeam({ body }: UserAddedToTeamDto) {
+    const teamObjectId = new Types.ObjectId(body.teamId)
+    const userObjectId = new Types.ObjectId(body.userId)
+
+    const session = await this.ChatRepository.startTransaction()
+
+    try {
+      await this.ChatRepository.updateByQuery({ team: teamObjectId }, { $push: { members: userObjectId } })
+      await this.UserRepository.update(userObjectId, { $set: { chat: updateChat._id } })
+
+      await session.commitTransaction()
     } catch (error) {
       await session.abortTransaction()
       throw error

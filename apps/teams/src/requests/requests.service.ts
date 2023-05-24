@@ -11,6 +11,7 @@ import {
   RequestDeniedDto,
   SERVICES,
   SQUAD_LIMIT,
+  UserAddedToTeamDto,
 } from '@lib/utils'
 import { UpdateRequestDto } from '../dtos/update-request.dto'
 import { ClientProxy } from '@nestjs/microservices'
@@ -22,6 +23,7 @@ export class RequestsService {
     private readonly UserRepository: UserRepository,
     private readonly TeamRepository: TeamRepository,
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private readonly notificationsService: ClientProxy,
+    @Inject(SERVICES.CHATS_SERVICE) private readonly chatsService: ClientProxy,
   ) {}
 
   async create(createRequestDto: CreateRequestDto, user: UserDocument, token: string) {
@@ -99,7 +101,7 @@ export class RequestsService {
       const [req, teamDoc, userDoc] = await Promise.all([updateRequestPromise, updateTeamPromise, updateUserPromise])
       await session.commitTransaction()
 
-      const payload: RequestAcceptedDto = {
+      const notificationsPayload: RequestAcceptedDto = {
         body: {
           managerId: teamDoc.manager,
           userName: `${userDoc.firstName} ${userDoc.lastName}`,
@@ -110,7 +112,14 @@ export class RequestsService {
         token,
       }
 
-      this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, payload)
+      const chatsPayload: UserAddedToTeamDto = {
+        body: { teamId: team, userId: user._id },
+        token,
+      }
+
+      this.chatsService.emit<any, UserAddedToTeamDto>(EVENTS.USER_ADDED_TO_TEAM, chatsPayload)
+      this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, notificationsPayload)
+
       return req
     } catch (error) {
       await session.abortTransaction()

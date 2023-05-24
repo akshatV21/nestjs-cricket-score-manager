@@ -34,6 +34,10 @@ export abstract class AbstractRepository<T extends Document, S extends Record<st
     return this.AbstractModel.findByIdAndUpdate(id, updateDto, { new: true })
   }
 
+  async updateByQuery(query: FilterQuery<T>, updateDto: UpdateQuery<T>) {
+    return this.AbstractModel.findOneAndUpdate(query, updateDto, { new: true })
+  }
+
   async startTransaction() {
     const session = await this.connection.startSession()
     session.startTransaction()

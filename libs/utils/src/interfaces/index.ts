@@ -53,3 +53,10 @@ export interface TeamCreatedDto extends BaseDto {
     managerId: string | Types.ObjectId
   }
 }
+
+export interface UserAddedToTeamDto extends BaseDto {
+  body: {
+    teamId: string | Types.ObjectId
+    userId: string | Types.ObjectId
+  }
+}

@@ -18,6 +18,7 @@ export const EVENTS = {
   REQUEST_ACCEPTED: 'request-accepted',
   REQUEST_DENIED: 'request-denied',
   TEAM_CREATED: 'team-created',
+  USER_ADDED_TO_TEAM: 'user-added-to-team',
 } as const
 
 export const CONTEXT_TYPES = {
