@@ -65,8 +65,8 @@ export class ChatsService {
     const session = await this.ChatRepository.startTransaction()
 
     try {
-      await this.ChatRepository.updateByQuery({ team: teamObjectId }, { $push: { members: userObjectId } })
-      await this.UserRepository.update(userObjectId, { $set: { chat: updateChat._id } })
+      const chat = await this.ChatRepository.updateByQuery({ team: teamObjectId }, { $push: { members: userObjectId } })
+      await this.UserRepository.update(userObjectId, { $set: { chat: chat._id } })
 
       await session.commitTransaction()
     } catch (error) {
