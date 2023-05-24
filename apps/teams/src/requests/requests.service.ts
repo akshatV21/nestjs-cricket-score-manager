@@ -46,6 +46,12 @@ export class RequestsService {
       if (createRequestDto.type === 'scorer-join-request' && toUser.type !== 'scorer')
         throw new BadRequestException('The user you requested is not a scorer.')
 
+      if (createRequestDto.type === 'player-join-request' && team.squad.includes(createRequestDto.user))
+        throw new BadRequestException('Player already exists in your squad.')
+
+      if (createRequestDto.type === 'player-join-request' && toUser._id(team.scorer))
+        throw new BadRequestException('This scorer is already assigned to your team.')
+
       const requestObjectId = new Types.ObjectId()
       const createRequestPromise = this.RequestRepository.create({ ...createRequestDto, team: teamId }, requestObjectId)
 
