@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common'
 import { ChatsService } from './chats.service'
 import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateChatDto } from './dtos/create-chat.dto'
+import { ParseObjectId } from '@lib/utils'
+import { Types } from 'mongoose'
 
 @Controller('chats')
 export class ChatsController {
@@ -12,5 +14,19 @@ export class ChatsController {
   async httpCreateChat(@Body() createChatDto: CreateChatDto, @ReqUser() user: UserDocument, @Token() token: string) {
     const chat = await this.chatsService.createBetweenTeamChat(createChatDto, user, token)
     return { success: true, message: 'Chat created successfully.', data: { chat } }
+  }
+
+  @Get()
+  @Auth({ types: ['manager'] })
+  async httpGetChatsList(@Query('page', ParseIntPipe) page: number, @ReqUser() user: UserDocument) {
+    const chats = await this.chatsService.list(page, user)
+    return { success: true, message: 'Chats fetched successfully.', data: { chats } }
+  }
+
+  @Get(':chatId')
+  @Auth({ types: ['manager'] })
+  async httpGetChat(@Param('chatId', ParseObjectId) chatId: Types.ObjectId, @ReqUser() user: UserDocument) {
+    const chat = await this.chatsService.get(chatId, user)
+    return { success: true, message: 'Chat fetched successfully.', data: { chat } }
   }
 }

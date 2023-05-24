@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { ForbiddenException, Injectable } from '@nestjs/common'
 import { CreateChatDto } from './dtos/create-chat.dto'
-import { ChatRepository, TeamRepository, UserDocument, UserRepository } from '@lib/common'
-import { Types } from 'mongoose'
-import { TeamCreatedDto, UserAddedToTeamDto } from '@lib/utils'
+import { ChatDocument, ChatRepository, TeamRepository, UserDocument, UserRepository } from '@lib/common'
+import { ProjectionType, QueryOptions, Types } from 'mongoose'
+import { CHATS_PAGENATION_LIMIT, TeamCreatedDto, UserAddedToTeamDto } from '@lib/utils'
 
 @Injectable()
 export class ChatsService {
@@ -73,5 +73,30 @@ export class ChatsService {
       await session.abortTransaction()
       throw error
     }
+  }
+
+  async get(chatId: Types.ObjectId, user: UserDocument) {
+    const options: QueryOptions<ChatDocument> = { populate: { path: 'teams', select: 'name' } }
+    const chat = await this.ChatRepository.findById(chatId, {}, options)
+    if (!chat.teams.includes(user.team)) throw new ForbiddenException('You cannot make this request.')
+
+    return chat
+  }
+
+  async list(page: number, user: UserDocument) {
+    const skip = (page - 1) * CHATS_PAGENATION_LIMIT
+    const options: QueryOptions<ChatDocument> = {
+      populate: { path: 'teams', select: 'name' },
+      skip,
+      limit: CHATS_PAGENATION_LIMIT,
+    }
+
+    const chats = await this.ChatRepository.find(
+      { teams: { $elemMatch: { $in: [new Types.ObjectId(user.team)] } } },
+      {},
+      options,
+    )
+
+    return chats
   }
 }
