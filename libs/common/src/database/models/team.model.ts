@@ -31,6 +31,9 @@ export class Team {
 
   @Prop({ default: [], ref: 'Statistic' })
   statistics?: Types.ObjectId
+
+  @Prop({ default: [], ref: 'Chat' })
+  chats?: Types.ObjectId[]
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team)

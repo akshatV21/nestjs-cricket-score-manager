@@ -14,7 +14,6 @@ import {
 } from '@lib/utils'
 import { UpdateRequestDto } from '../dtos/update-request.dto'
 import { ClientProxy } from '@nestjs/microservices'
-import { string } from 'joi'
 
 @Injectable()
 export class RequestsService {

@@ -47,3 +47,8 @@ export const REQUEST_STATUS = {
 
 export const TEAMS_PAGINATION_LIMIT = 5
 export const REQUESTS_PAGINATION_LIMIT = 5
+
+export const CHAT_TYPE = {
+  IN_TEAM: 'in-team',
+  BETWEEN_TEAM: 'between-team',
+} as const
