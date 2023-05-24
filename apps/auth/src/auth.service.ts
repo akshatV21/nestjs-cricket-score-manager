@@ -20,11 +20,11 @@ export class AuthService {
   async register(registerUserDto: RegisterUserDto) {
     const user = await this.UserRepository.create(registerUserDto)
     const emailValidationToken = sign({ id: user.id }, this.configService.get('JWT_SECRET'), { expiresIn: '2h' })
-    this.notificationsService.emit<any, UserRegisteredDto>(EVENTS.USER_REGISTERED, {
-      jwt: emailValidationToken,
-      email: user.email,
-      name: `${user.firstName} ${user.lastName}`,
-    })
+    // this.notificationsService.emit<any, UserRegisteredDto>(EVENTS.USER_REGISTERED, {
+    //   jwt: emailValidationToken,
+    //   email: user.email,
+    //   name: `${user.firstName} ${user.lastName}`,
+    // })
   }
 
   async login(loginUserDto: LoginUserDto) {

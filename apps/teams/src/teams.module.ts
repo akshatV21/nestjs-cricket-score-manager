@@ -34,7 +34,7 @@ import { RequestsModule } from './requests/requests.module'
         RMQ_TEAMS_QUEUE: Joi.string().required(),
       }),
     }),
-    RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE]),
+    RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE, SERVICES.CHATS_SERVICE]),
     DatabaseModule,
     DatabaseModule.forFeature([
       { name: User.name, schema: UserSchema },
