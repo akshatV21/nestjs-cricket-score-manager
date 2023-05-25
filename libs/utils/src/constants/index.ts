@@ -56,3 +56,15 @@ export const CHAT_TYPE = {
   IN_TEAM: 'in-team',
   BETWEEN_TEAM: 'between-team',
 } as const
+
+export const MESSAGE_TYPES = {
+  TEXT: 'text',
+  ACCOUNCEMENT: 'annoucement',
+  MATCH_REQUEST: 'match-request',
+} as const
+
+export const MESSAGE_STATUS = {
+  SENT: 'sent',
+  RECIEVED: 'recieved',
+  SEEN: 'seen',
+} as const

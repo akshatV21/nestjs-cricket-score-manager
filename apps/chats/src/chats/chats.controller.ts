@@ -32,11 +32,13 @@ export class ChatsController {
   }
 
   @EventPattern(EVENTS.TEAM_CREATED)
+  @Auth({ types: ['manager'] })
   handleTeamCreatedEvent(@Payload() payload: TeamCreatedDto) {
     this.chatsService.createInTeamChat(payload)
   }
 
   @EventPattern(EVENTS.USER_ADDED_TO_TEAM)
+  @Auth({ types: ['manager'] })
   handleUserAddedToTeamEvent(@Payload() payload: UserAddedToTeamDto) {
     this.chatsService.addUserToTeam(payload)
   }
