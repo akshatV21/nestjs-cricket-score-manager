@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io'
 import { RequestType, UserType } from '../types'
-import { RequestDocument } from '@lib/common'
+import { ChatDocument, MessageDocument, RequestDocument } from '@lib/common'
 import { Types } from 'mongoose'
 
 export interface AuthOptions {
@@ -59,4 +59,9 @@ export interface UserAddedToTeamDto extends BaseDto {
     teamId: string | Types.ObjectId
     userId: string | Types.ObjectId
   }
+}
+
+export interface MessageCreatedDto {
+  message: MessageDocument
+  chat: ChatDocument
 }

@@ -1,5 +1,6 @@
-import { MESSAGE_STATUS, MessageStatus, MessageType } from '@lib/utils'
+import { ChatType, MESSAGE_STATUS, MessageStatus, MessageType } from '@lib/utils'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { string } from 'joi'
 import { Document, Types } from 'mongoose'
 
 export type MessageDocument = Message & Document
@@ -9,6 +10,9 @@ export class Message {
   @Prop({ required: true, ref: 'Chat' })
   chat: Types.ObjectId
 
+  @Prop({ required: true, type: String })
+  forChatType: ChatType
+
   @Prop({ ref: 'Team' })
   team?: Types.ObjectId
 
@@ -17,6 +21,9 @@ export class Message {
 
   @Prop({ required: true, type: String })
   type: MessageType
+
+  @Prop()
+  link?: string
 
   @Prop({ default: MESSAGE_STATUS.SENT, type: String })
   status?: MessageStatus
