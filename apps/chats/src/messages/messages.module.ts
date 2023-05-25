@@ -10,6 +10,8 @@ import {
   MessageRepository,
   MessageSchema,
 } from '@lib/common'
+import { MessagesGateway } from './messages.gateway'
+import { SocketSessions } from '@lib/utils'
 
 @Module({
   imports: [
@@ -19,6 +21,6 @@ import {
     ]),
   ],
   controllers: [MessagesController],
-  providers: [MessagesService, ChatRepository, MessageRepository],
+  providers: [MessagesService, ChatRepository, MessageRepository, MessagesGateway, SocketSessions],
 })
 export class MessagesModule {}

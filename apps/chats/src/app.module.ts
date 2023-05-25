@@ -6,6 +6,7 @@ import { Authorize, Chat, ChatSchema, DatabaseModule, RmqModule, Team, TeamSchem
 import { SERVICES } from '@lib/utils'
 import { APP_GUARD } from '@nestjs/core'
 import { MessagesModule } from './messages/messages.module'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MessagesModule } from './messages/messages.module'
     DatabaseModule,
     ChatsModule,
     MessagesModule,
+    EventEmitterModule.forRoot({ global: true }),
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: Authorize }],

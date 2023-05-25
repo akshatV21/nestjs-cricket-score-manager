@@ -65,3 +65,10 @@ export interface MessageCreatedDto {
   message: MessageDocument
   chat: ChatDocument
 }
+
+export interface JoinUserChatsDto {
+  userId: string
+  userType: UserType
+  teamChat: string
+  teamId: string
+}

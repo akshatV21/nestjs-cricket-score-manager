@@ -40,7 +40,7 @@ export class MessagesService {
 
       const [message] = await Promise.all([createMessagePromise, updateChatPromise])
 
-      this.eventEmitter.emit(EVENTS.MSG_CREATED, { message, chat })
+      this.eventEmitter.emit(EVENTS.MSG_CREATED, message)
       await session.commitTransaction()
     } catch (error) {
       await session.abortTransaction()
