@@ -2,8 +2,9 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs
 import { ChatsService } from './chats.service'
 import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateChatDto } from './dtos/create-chat.dto'
-import { ParseObjectId } from '@lib/utils'
+import { EVENTS, ParseObjectId, TeamCreatedDto, UserAddedToTeamDto } from '@lib/utils'
 import { Types } from 'mongoose'
+import { EventPattern, Payload } from '@nestjs/microservices'
 
 @Controller('chats')
 export class ChatsController {
@@ -28,5 +29,15 @@ export class ChatsController {
   async httpGetChat(@Param('chatId', ParseObjectId) chatId: Types.ObjectId, @ReqUser() user: UserDocument) {
     const chat = await this.chatsService.get(chatId, user)
     return { success: true, message: 'Chat fetched successfully.', data: { chat } }
+  }
+
+  @EventPattern(EVENTS.TEAM_CREATED)
+  handleTeamCreatedEvent(@Payload() payload: TeamCreatedDto) {
+    this.chatsService.createInTeamChat(payload)
+  }
+
+  @EventPattern(EVENTS.USER_ADDED_TO_TEAM)
+  handleUserAddedToTeamEvent(@Payload() payload: UserAddedToTeamDto) {
+    this.chatsService.addUserToTeam(payload)
   }
 }
