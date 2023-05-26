@@ -72,3 +72,25 @@ export interface JoinUserChatsDto {
   teamChat: string
   teamId: string
 }
+
+export interface StartedTypeingDto {
+  chatId: string
+  userId: string
+}
+
+export interface EndedTypeingDto {
+  chatId: string
+  userId: string
+}
+
+export interface MsgRecievedDto {
+  chatId: string
+  userId: string
+  messageId: string
+}
+
+export interface MsgSeenDto {
+  chatId: string
+  userId: string
+  messageId: string
+}

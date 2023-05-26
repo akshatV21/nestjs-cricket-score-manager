@@ -21,6 +21,10 @@ export const EVENTS = {
   USER_ADDED_TO_TEAM: 'user-added-to-team',
   MSG_CREATED: 'message-created',
   JOIN_USER_CHAT_ROOMS: 'join-user-chat-room',
+  STARTED_TYPING: 'started-typing',
+  ENDED_TYPING: 'ended-typing',
+  MSG_RECIEVED: 'message-recieved',
+  MSG_SEEN: 'message-seen',
 } as const
 
 export const CONTEXT_TYPES = {

@@ -1,13 +1,16 @@
-import { Auth, Authorize, ChatRepository, MessageDocument, TeamRepository } from '@lib/common'
+import { Auth, Authorize, ChatRepository, MessageDocument, MessageRepository, TeamRepository } from '@lib/common'
 import {
   AuthenticatedSocket,
   AuthorizeDto,
   EVENTS,
   EXCEPTION_MSGS,
+  EndedTypeingDto,
   JoinUserChatsDto,
-  MessageCreatedDto,
+  MESSAGE_STATUS,
+  MsgRecievedDto,
   SERVICES,
   SocketSessions,
+  StartedTypeingDto,
   catchAuthErrors,
 } from '@lib/utils'
 import { Inject, UseGuards } from '@nestjs/common'
@@ -30,7 +33,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
     private readonly socketSessions: SocketSessions,
     @Inject(SERVICES.AUTH_SERVICE) private readonly authService: ClientProxy,
     private readonly TeamRepository: TeamRepository,
-    private readonly ChatRepository: ChatRepository,
+    private readonly MessageRepository: MessageRepository,
   ) {}
 
   @WebSocketServer()
@@ -76,5 +79,35 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
     const socket = this.socketSessions.getSocket(senderId)
     socket.to(`${message.chat}`).emit(EVENTS.MSG_CREATED, message)
+  }
+
+  @SubscribeMessage(EVENTS.STARTED_TYPING)
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  handleTypingStartedEvent(payload: StartedTypeingDto) {
+    const socket = this.socketSessions.getSocket(payload.userId)
+    socket.to(payload.chatId).emit(EVENTS.STARTED_TYPING, payload)
+  }
+
+  @SubscribeMessage(EVENTS.ENDED_TYPING)
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  handleTypingEndedEvent(payload: EndedTypeingDto) {
+    const socket = this.socketSessions.getSocket(payload.userId)
+    socket.to(payload.chatId).emit(EVENTS.ENDED_TYPING, payload)
+  }
+
+  @SubscribeMessage(EVENTS.MSG_RECIEVED)
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async handleMsgRecievedEvent(payload: MsgRecievedDto) {
+    const socket = this.socketSessions.getSocket(payload.userId)
+    await this.MessageRepository.update(payload.messageId, { $set: { status: MESSAGE_STATUS.RECIEVED } })
+    socket.to(payload.chatId).emit(EVENTS.MSG_RECIEVED, payload)
+  }
+
+  @SubscribeMessage(EVENTS.MSG_SEEN)
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async handleMsgSeenEvent(payload: MsgRecievedDto) {
+    const socket = this.socketSessions.getSocket(payload.userId)
+    await this.MessageRepository.update(payload.messageId, { $set: { status: MESSAGE_STATUS.SEEN } })
+    socket.to(payload.chatId).emit(EVENTS.MSG_SEEN, payload)
   }
 }
