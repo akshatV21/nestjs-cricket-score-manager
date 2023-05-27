@@ -17,6 +17,10 @@ export class CreateMessageDto {
   @IsEnum(MESSAGE_TYPES)
   type: MessageType
 
+  @IsNotEmpty()
+  @IsString()
+  text: MessageType
+
   @ValidateIf((object: CreateMessageDto, value) => object.forChatType === 'between-team')
   @IsMongoId()
   @Type(() => Types.ObjectId)

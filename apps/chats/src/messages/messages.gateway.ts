@@ -17,6 +17,7 @@ import { Inject, UseGuards } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { ClientProxy } from '@nestjs/microservices'
 import {
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
@@ -60,13 +61,17 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage(EVENTS.JOIN_USER_CHAT_ROOMS)
   @Auth({ types: ['player', 'scorer', 'manager'] })
   @UseGuards(Authorize)
-  async joinUserChatRooms(payload: JoinUserChatsDto) {
+  async joinUserChatRooms(@MessageBody() payload: JoinUserChatsDto) {
     const socket = this.socketSessions.getSocket(payload.userId)
     const chatRooms = [payload.teamChat]
 
     if (payload.userType === 'manager') {
       const team = await this.TeamRepository.findById(payload.teamId)
-      team.chats.forEach(chat => chatRooms.push(chat.toString()))
+      team.chats.forEach(chat => {
+        if (!chatRooms.includes(chat.toString())) {
+          chatRooms.push(chat.toString())
+        }
+      })
     }
 
     socket.join(chatRooms)
@@ -83,31 +88,31 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   @SubscribeMessage(EVENTS.STARTED_TYPING)
   @Auth({ types: ['player', 'scorer', 'manager'] })
-  handleTypingStartedEvent(payload: StartedTypeingDto) {
+  handleTypingStartedEvent(@MessageBody() payload: StartedTypeingDto) {
     const socket = this.socketSessions.getSocket(payload.userId)
     socket.to(payload.chatId).emit(EVENTS.STARTED_TYPING, payload)
   }
 
   @SubscribeMessage(EVENTS.ENDED_TYPING)
   @Auth({ types: ['player', 'scorer', 'manager'] })
-  handleTypingEndedEvent(payload: EndedTypeingDto) {
+  handleTypingEndedEvent(@MessageBody() payload: EndedTypeingDto) {
     const socket = this.socketSessions.getSocket(payload.userId)
     socket.to(payload.chatId).emit(EVENTS.ENDED_TYPING, payload)
   }
 
   @SubscribeMessage(EVENTS.MSG_RECIEVED)
   @Auth({ types: ['player', 'scorer', 'manager'] })
-  async handleMsgRecievedEvent(payload: MsgRecievedDto) {
-    const socket = this.socketSessions.getSocket(payload.userId)
-    await this.MessageRepository.update(payload.messageId, { $set: { status: MESSAGE_STATUS.RECIEVED } })
+  async handleMsgRecievedEvent(@MessageBody() payload: MsgRecievedDto) {
+    const msg = await this.MessageRepository.update(payload.messageId, { $set: { status: MESSAGE_STATUS.RECIEVED } })
+    const socket = this.socketSessions.getSocket(msg.user ?? msg.team)
     socket.to(payload.chatId).emit(EVENTS.MSG_RECIEVED, payload)
   }
 
   @SubscribeMessage(EVENTS.MSG_SEEN)
   @Auth({ types: ['player', 'scorer', 'manager'] })
   async handleMsgSeenEvent(payload: MsgRecievedDto) {
-    const socket = this.socketSessions.getSocket(payload.userId)
-    await this.MessageRepository.update(payload.messageId, { $set: { status: MESSAGE_STATUS.SEEN } })
-    socket.to(payload.chatId).emit(EVENTS.MSG_SEEN, payload)
+    const msg = await this.MessageRepository.update(payload.messageId, { $set: { status: MESSAGE_STATUS.SEEN } })
+    const socket = this.socketSessions.getSocket(msg.user ?? msg.team)
+    socket.to(payload.chatId).emit(EVENTS.MSG_RECIEVED, payload)
   }
 }

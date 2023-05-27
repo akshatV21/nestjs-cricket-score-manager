@@ -39,6 +39,7 @@ services:
     command: npm run start:dev chats
     ports:
       - '8083:8083'
+      - '8085:8085'
     volumes:
       - .:/app
     env_file:

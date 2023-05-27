@@ -9,6 +9,9 @@ import {
   Message,
   MessageRepository,
   MessageSchema,
+  Team,
+  TeamRepository,
+  TeamSchema,
 } from '@lib/common'
 import { MessagesGateway } from './messages.gateway'
 import { SocketSessions } from '@lib/utils'
@@ -18,9 +21,10 @@ import { SocketSessions } from '@lib/utils'
     DatabaseModule.forFeature([
       { name: Chat.name, schema: ChatSchema },
       { name: Message.name, schema: MessageSchema },
+      { name: Team.name, schema: TeamSchema },
     ]),
   ],
   controllers: [MessagesController],
-  providers: [MessagesService, ChatRepository, MessageRepository, MessagesGateway, SocketSessions],
+  providers: [MessagesService, ChatRepository, MessageRepository, MessagesGateway, SocketSessions, TeamRepository],
 })
 export class MessagesModule {}
