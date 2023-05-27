@@ -7,7 +7,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { RmqService } from '@lib/common'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AuthModule)
+  const app = await NestFactory.create(AuthModule, { cors: { origin: '*' } })
 
   const configService = app.get<ConfigService>(ConfigService)
   const rmqService = app.get<RmqService>(RmqService)

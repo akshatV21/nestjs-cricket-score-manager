@@ -27,7 +27,7 @@ import {
 import { lastValueFrom } from 'rxjs'
 import { Server } from 'socket.io'
 
-@WebSocketGateway(8085, { namespace: 'messages' })
+@WebSocketGateway(8085, { namespace: 'messages', cors: { origin: '*' } })
 export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly socketSessions: SocketSessions,

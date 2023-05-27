@@ -74,7 +74,7 @@ export class RequestsService {
         token,
       }
 
-      this.notificationsService.emit<any, RequestCreatedDto>(EVENTS.REQUEST_CREATED, payload)
+      // this.notificationsService.emit<any, RequestCreatedDto>(EVENTS.REQUEST_CREATED, payload)
       return request
     } catch (error) {
       await session.abortTransaction()
@@ -118,7 +118,7 @@ export class RequestsService {
       }
 
       this.chatsService.emit<any, UserAddedToTeamDto>(EVENTS.USER_ADDED_TO_TEAM, chatsPayload)
-      this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, notificationsPayload)
+      // this.notificationsService.emit<any, RequestAcceptedDto>(EVENTS.REQUEST_ACCEPTED, notificationsPayload)
 
       return req
     } catch (error) {
@@ -149,7 +149,7 @@ export class RequestsService {
       token,
     }
 
-    this.notificationsService.emit<any, RequestDeniedDto>(EVENTS.REQUEST_DENIED, payload)
+    // this.notificationsService.emit<any, RequestDeniedDto>(EVENTS.REQUEST_DENIED, payload)
     return req
   }
 

@@ -7,7 +7,7 @@ import { RmqService } from '@lib/common'
 import { ValidationPipe } from '@nestjs/common'
 
 async function bootstrap() {
-  const app = await NestFactory.create(TeamsModule)
+  const app = await NestFactory.create(TeamsModule, { cors: { origin: '*' } })
 
   const configService = app.get<ConfigService>(ConfigService)
   const rmqService = app.get<RmqService>(RmqService)
