@@ -74,3 +74,20 @@ export const MESSAGE_STATUS = {
   RECIEVED: 'recieved',
   SEEN: 'seen',
 } as const
+
+export const MATCH_STATUS = {
+  REQUESTED: 'requested',
+  UPCOMING: 'upcoming',
+  TOSS: 'toss',
+  LIVE: 'live',
+  INNINGS_BREAK: 'innings-break',
+  FINISHED: 'finished',
+  ABANDONED: 'abandoned',
+  RESCHEDULED: 'rescheduled',
+} as const
+
+export const FORMATS = {
+  ODI: 'odi',
+  TEST: 'test',
+  T20I: 't20i',
+} as const

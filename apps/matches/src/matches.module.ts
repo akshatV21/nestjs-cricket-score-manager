@@ -3,7 +3,20 @@ import { MatchesController } from './matches.controller'
 import { MatchesService } from './matches.service'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
-import { Authorize, DatabaseModule, RmqModule, Team, TeamRepository, TeamSchema, User, UserRepository, UserSchema } from '@lib/common'
+import {
+  Authorize,
+  DatabaseModule,
+  Match,
+  MatchRepository,
+  MatchSchema,
+  RmqModule,
+  Team,
+  TeamRepository,
+  TeamSchema,
+  User,
+  UserRepository,
+  UserSchema,
+} from '@lib/common'
 import { SERVICES } from '@lib/utils'
 import { APP_GUARD } from '@nestjs/core'
 
@@ -27,9 +40,16 @@ import { APP_GUARD } from '@nestjs/core'
     DatabaseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Team.name, schema: TeamSchema },
+      { name: Match.name, schema: MatchSchema },
     ]),
   ],
   controllers: [MatchesController],
-  providers: [MatchesService, UserRepository, TeamRepository, { provide: APP_GUARD, useClass: Authorize }],
+  providers: [
+    MatchesService,
+    UserRepository,
+    TeamRepository,
+    { provide: APP_GUARD, useClass: Authorize },
+    MatchRepository,
+  ],
 })
 export class MatchesModule {}

@@ -1,6 +1,8 @@
 import {
   CHAT_TYPE,
   CONTEXT_TYPES,
+  FORMATS,
+  MATCH_STATUS,
   MESSAGE_STATUS,
   MESSAGE_TYPES,
   REQUEST_STATUS,
@@ -26,3 +28,7 @@ export type ChatType = ObjectValuesUnion<typeof CHAT_TYPE>
 export type MessageType = ObjectValuesUnion<typeof MESSAGE_TYPES>
 
 export type MessageStatus = ObjectValuesUnion<typeof MESSAGE_STATUS>
+
+export type MatchStatus = ObjectValuesUnion<typeof MATCH_STATUS>
+
+export type Format = ObjectValuesUnion<typeof FORMATS>
