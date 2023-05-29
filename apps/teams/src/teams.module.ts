@@ -32,6 +32,8 @@ import { RequestsModule } from './requests/requests.module'
         RMQ_AUTH_QUEUE: Joi.string().required(),
         RMQ_NOTIFICATIONS_QUEUE: Joi.string().required(),
         RMQ_TEAMS_QUEUE: Joi.string().required(),
+        RMQ_CHATS_QUEUE: Joi.string().required(),
+        RMQ_MATCHES_QUEUE: Joi.string().required(),
       }),
     }),
     RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE, SERVICES.CHATS_SERVICE]),

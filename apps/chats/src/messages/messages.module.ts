@@ -12,6 +12,9 @@ import {
   Team,
   TeamRepository,
   TeamSchema,
+  User,
+  UserRepository,
+  UserSchema,
 } from '@lib/common'
 import { MessagesGateway } from './messages.gateway'
 import { SocketSessions } from '@lib/utils'
@@ -22,9 +25,10 @@ import { SocketSessions } from '@lib/utils'
       { name: Chat.name, schema: ChatSchema },
       { name: Message.name, schema: MessageSchema },
       { name: Team.name, schema: TeamSchema },
+      { name: User.name, schema: UserSchema }
     ]),
   ],
   controllers: [MessagesController],
-  providers: [MessagesService, ChatRepository, MessageRepository, MessagesGateway, SocketSessions, TeamRepository],
+  providers: [MessagesService, ChatRepository, MessageRepository, MessagesGateway, SocketSessions, TeamRepository, UserRepository],
 })
 export class MessagesModule {}

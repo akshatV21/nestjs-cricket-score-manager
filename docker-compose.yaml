@@ -48,6 +48,22 @@ services:
       - mongo-server
       - rmq-server
 
+  matches:
+    build:
+      context: .
+      dockerfile: ./apps/matches/Dockerfile
+      target: development
+    command: npm run start:dev matches
+    ports:
+      - '8086:8086'
+    volumes:
+      - .:/app
+    env_file:
+      - ./apps/matches/.env
+    depends_on:
+      - mongo-server
+      - rmq-server
+
   notifications:
     build:
       context: .
