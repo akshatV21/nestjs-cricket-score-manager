@@ -22,8 +22,8 @@ export class Message {
   @Prop({ required: true, type: String })
   type: MessageType
 
-  @Prop({ required: true, type: String })
-  text: string
+  @Prop({ required: false, type: String })
+  text?: string
 
   @Prop()
   link?: string

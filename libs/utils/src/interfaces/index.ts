@@ -94,3 +94,8 @@ export interface MsgSeenDto {
   userId: string
   messageId: string
 }
+
+export interface UserAddedToTeamMsgDto {
+  chatId: string
+  userId: string
+}

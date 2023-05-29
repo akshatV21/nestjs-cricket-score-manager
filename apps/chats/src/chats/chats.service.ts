@@ -2,7 +2,8 @@ import { ForbiddenException, Injectable } from '@nestjs/common'
 import { CreateChatDto } from './dtos/create-chat.dto'
 import { ChatDocument, ChatRepository, TeamRepository, UserDocument, UserRepository } from '@lib/common'
 import { ProjectionType, QueryOptions, Types } from 'mongoose'
-import { CHATS_PAGENATION_LIMIT, TeamCreatedDto, UserAddedToTeamDto } from '@lib/utils'
+import { CHATS_PAGENATION_LIMIT, EVENTS, TeamCreatedDto, UserAddedToTeamDto } from '@lib/utils'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
 export class ChatsService {
@@ -10,6 +11,7 @@ export class ChatsService {
     private readonly ChatRepository: ChatRepository,
     private readonly TeamRepository: TeamRepository,
     private readonly UserRepository: UserRepository,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async createBetweenTeamChat({ teamToAdd }: CreateChatDto, user: UserDocument, token: string) {
@@ -68,6 +70,7 @@ export class ChatsService {
       const chat = await this.ChatRepository.updateByQuery({ team: teamObjectId }, { $push: { members: userObjectId } })
       await this.UserRepository.update(userObjectId, { $set: { chat: chat._id } })
 
+      this.eventEmitter.emit(EVENTS.USER_ADDED_TO_TEAM, { chatId: chat._id.toString(), userId: body.userId })
       await session.commitTransaction()
     } catch (error) {
       await session.abortTransaction()

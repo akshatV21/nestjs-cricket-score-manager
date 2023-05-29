@@ -19,7 +19,7 @@ export class CreateMessageDto {
 
   @IsNotEmpty()
   @IsString()
-  text: MessageType
+  text?: MessageType
 
   @ValidateIf((object: CreateMessageDto, value) => object.forChatType === 'between-team')
   @IsMongoId()
