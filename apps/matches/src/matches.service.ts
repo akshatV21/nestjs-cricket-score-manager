@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
 import { MatchRepository, TeamRepository, UserDocument } from '@lib/common'
 import { EVENTS, MATCH_STATUS, MatchRequestedDto, SERVICES } from '@lib/utils'
-import { Types } from 'mongoose'
+import { ProjectionType, QueryOptions, Types } from 'mongoose'
 import { ClientProxy } from '@nestjs/microservices'
 
 @Injectable()
@@ -73,5 +73,14 @@ export class MatchesService {
       await session.abortTransaction()
       throw error
     }
+  }
+
+  async get(matchId: Types.ObjectId, user: UserDocument) {
+    const projections: ProjectionType<UserDocument> = {}
+    const options: QueryOptions<UserDocument> = {
+      populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
+    }
+
+    return this.MatchRepository.findById(matchId, projections, options)
   }
 }

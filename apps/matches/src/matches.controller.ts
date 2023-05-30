@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { MatchesService } from './matches.service'
 import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
+import { ParseObjectId } from '@lib/utils'
+import { Types } from 'mongoose'
 
 @Controller('matches')
 export class MatchesController {
@@ -12,5 +14,12 @@ export class MatchesController {
   async httpCreateMatch(@Body() createMatchDto: CreateMatchDto, @ReqUser() user: UserDocument, @Token() token: string) {
     const match = await this.matchesService.create(createMatchDto, user, token)
     return { success: true, message: 'Match created successfully', data: { match } }
+  }
+
+  @Get(':matchId')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpGetMatchById(@Param('matchId', ParseObjectId) matchId: Types.ObjectId, @ReqUser() user: UserDocument) {
+    const match = await this.matchesService.get(matchId, user)
+    return { success: true, message: 'Match fetched successfully', data: { match } }
   }
 }
