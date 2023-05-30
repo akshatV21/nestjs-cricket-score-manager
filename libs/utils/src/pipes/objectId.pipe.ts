@@ -4,6 +4,6 @@ import { Types } from 'mongoose'
 @Injectable()
 export class ParseObjectId implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
-    return new Types.ObjectId(value)
+    return value ? new Types.ObjectId(value) : null
   }
 }

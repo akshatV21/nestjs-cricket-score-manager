@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
-import { MatchRepository, TeamRepository, UserDocument } from '@lib/common'
-import { EVENTS, MATCH_STATUS, MatchRequestedDto, SERVICES } from '@lib/utils'
-import { ProjectionType, QueryOptions, Types } from 'mongoose'
+import { MatchDocument, MatchRepository, TeamRepository, UserDocument } from '@lib/common'
+import { EVENTS, MATCH_STATUS, MatchRequestedDto, SERVICES, UPCOMING_MATCHES_LIMIT } from '@lib/utils'
+import { FilterQuery, ProjectionType, QueryOptions, Types } from 'mongoose'
 import { ClientProxy } from '@nestjs/microservices'
 
 @Injectable()
@@ -82,5 +82,34 @@ export class MatchesService {
     }
 
     return this.MatchRepository.findById(matchId, projections, options)
+  }
+
+  async listMatchRequests(teamId: string | Types.ObjectId) {
+    const projections: ProjectionType<UserDocument> = {}
+    const options: QueryOptions<UserDocument> = {
+      populate: { path: 'teams', select: 'name' },
+    }
+
+    return this.MatchRepository.find(
+      { teams: { $elemMatch: { $in: [teamId] } }, status: MATCH_STATUS.REQUESTED },
+      projections,
+      options,
+    )
+  }
+
+  async listUpcomingMatches(page: number, teamId: Types.ObjectId) {
+    const skip = (page - 1) / UPCOMING_MATCHES_LIMIT
+
+    const query: FilterQuery<MatchDocument> = teamId
+      ? { status: MATCH_STATUS.UPCOMING, teams: { $elemMatch: { $in: [teamId] } } }
+      : { status: MATCH_STATUS.UPCOMING }
+    const projections: ProjectionType<MatchDocument> = {}
+    const options: QueryOptions<MatchDocument> = {
+      populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
+      skip,
+      limit: UPCOMING_MATCHES_LIMIT,
+    }
+
+    return this.MatchRepository.find(query, projections, options)
   }
 }

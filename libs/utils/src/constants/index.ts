@@ -58,6 +58,7 @@ export const REQUEST_STATUS = {
 export const TEAMS_PAGINATION_LIMIT = 5
 export const REQUESTS_PAGINATION_LIMIT = 5
 export const CHATS_PAGENATION_LIMIT = 4
+export const UPCOMING_MATCHES_LIMIT = 10
 
 export const CHAT_TYPE = {
   IN_TEAM: 'in-team',
