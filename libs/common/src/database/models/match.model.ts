@@ -13,13 +13,13 @@ export class Match {
   teams: Types.ObjectId[]
 
   @Prop({ ref: 'Team' })
-  toss: Types.ObjectId
+  toss?: Types.ObjectId
 
   @Prop({ default: MATCH_STATUS.REQUESTED, type: String })
-  status: MatchStatus
+  status?: MatchStatus
 
   @Prop({ default: [] })
-  squads: Squad[]
+  squads?: Squad[]
 
   @Prop({ required: true, type: String })
   format: Format
@@ -31,13 +31,13 @@ export class Match {
   requestBy: Types.ObjectId
 
   @Prop({ default: {} })
-  firstInnings: Inning
+  firstInnings?: Inning
 
   @Prop({ default: {} })
-  secondInnings: Inning
+  secondInnings?: Inning
 
   @Prop({ default: {} })
-  result: Result
+  result?: Result
 }
 
 export const MatchSchema = SchemaFactory.createForClass(Match)
