@@ -91,3 +91,8 @@ export const FORMATS = {
   TEST: 'test',
   T20I: 't20i',
 } as const
+
+export const WON_BY_VALUES = {
+  DEFENDING: 'defending',
+  CHASING: 'chasing',
+} as const

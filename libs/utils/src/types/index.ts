@@ -9,6 +9,7 @@ import {
   REQUEST_TYPES,
   SERVICES,
   USER_TYPE,
+  WON_BY_VALUES,
 } from '../constants'
 
 type ObjectValuesUnion<T extends Record<string, string>> = T extends Record<string, infer U> ? U : never
@@ -32,3 +33,5 @@ export type MessageStatus = ObjectValuesUnion<typeof MESSAGE_STATUS>
 export type MatchStatus = ObjectValuesUnion<typeof MATCH_STATUS>
 
 export type Format = ObjectValuesUnion<typeof FORMATS>
+
+export type WonBy = ObjectValuesUnion<typeof WON_BY_VALUES>
