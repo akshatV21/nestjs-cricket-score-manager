@@ -100,9 +100,13 @@ export interface UserAddedToTeamMsgDto {
   userId: string
 }
 
-export interface MatchRequestedDto {
-  fromTeamName: string
-  fromManagerId: string | Types.ObjectId
-  opponentManagerId: string | Types.ObjectId
-  matchId: string | Types.ObjectId
+export interface MatchRequestedDto extends BaseDto {
+  body: {
+    fromTeamName: string
+    fromManagerId: string | Types.ObjectId
+    fromTeamId: string | Types.ObjectId
+    opponentManagerId: string | Types.ObjectId
+    opponentTeamId: string | Types.ObjectId
+    matchId: string | Types.ObjectId
+  }
 }

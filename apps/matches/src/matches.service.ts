@@ -14,7 +14,7 @@ export class MatchesService {
     @Inject(SERVICES.CHATS_SERVICE) private chatsService: ClientProxy,
   ) {}
 
-  async create({ opponentTeamId, format, time }: CreateMatchDto, user: UserDocument) {
+  async create({ opponentTeamId, format, time }: CreateMatchDto, user: UserDocument, token: string) {
     const userTeamId = new Types.ObjectId(user.team)
     const matchRequestDate = `${time.getDate()}-${time.getMonth()}-${time.getFullYear()}`
 
@@ -53,10 +53,15 @@ export class MatchesService {
         updateTeamTwoPromise,
       ])
       const payload: MatchRequestedDto = {
-        fromTeamName: fromTeam.name,
-        fromManagerId: user._id,
-        opponentManagerId: opponentTeam.manager,
-        matchId: matchObjectId,
+        body: {
+          fromTeamName: fromTeam.name,
+          fromManagerId: user._id,
+          fromTeamId: fromTeam._id,
+          opponentManagerId: opponentTeam.manager,
+          opponentTeamId: opponentTeam._id,
+          matchId: matchObjectId,
+        },
+        token,
       }
 
       this.chatsService.emit(EVENTS.MATCH_REQUESTED, payload)
