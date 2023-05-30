@@ -87,10 +87,10 @@ export class ChatsService {
   }
 
   async list(page: number, user: UserDocument) {
-    const skip = (page - 1) * CHATS_PAGENATION_LIMIT
+    const skipCount = (page - 1) * CHATS_PAGENATION_LIMIT
     const options: QueryOptions<ChatDocument> = {
       populate: { path: 'teams', select: 'name' },
-      skip,
+      skipCount,
       limit: CHATS_PAGENATION_LIMIT,
     }
 

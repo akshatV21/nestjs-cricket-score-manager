@@ -56,13 +56,13 @@ export class TeamsService {
   }
 
   async list(page: number) {
-    const skip = (page - 1) * TEAMS_PAGINATION_LIMIT
+    const skipCount = (page - 1) * TEAMS_PAGINATION_LIMIT
 
     // update this projection and add these: nextMatch, statistics
     const projections: ProjectionType<TeamDocument> = { name: 1, manager: 1, scorer: 1 }
     const options: QueryOptions<TeamDocument> = {
       populate: { path: 'manager scorer', select: 'firstName lastName email' },
-      skip,
+      skipCount,
       limit: TEAMS_PAGINATION_LIMIT,
     }
 

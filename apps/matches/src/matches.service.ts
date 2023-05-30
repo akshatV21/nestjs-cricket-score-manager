@@ -98,7 +98,7 @@ export class MatchesService {
   }
 
   async listUpcomingMatches(page: number, teamId: Types.ObjectId) {
-    const skip = (page - 1) / UPCOMING_MATCHES_LIMIT
+    const skipCount = (page - 1) / UPCOMING_MATCHES_LIMIT
 
     const query: FilterQuery<MatchDocument> = teamId
       ? { status: MATCH_STATUS.UPCOMING, teams: { $elemMatch: { $in: [teamId] } } }
@@ -106,7 +106,7 @@ export class MatchesService {
     const projections: ProjectionType<MatchDocument> = {}
     const options: QueryOptions<MatchDocument> = {
       populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
-      skip,
+      skipCount,
       limit: UPCOMING_MATCHES_LIMIT,
     }
 
@@ -114,7 +114,7 @@ export class MatchesService {
   }
 
   async listLiveMatches(page: number, teamId: Types.ObjectId) {
-    const skip = (page - 1) / UPCOMING_MATCHES_LIMIT
+    const skipCount = (page - 1) / UPCOMING_MATCHES_LIMIT
 
     const query: FilterQuery<MatchDocument> = teamId
       ? {
@@ -125,7 +125,7 @@ export class MatchesService {
     const projections: ProjectionType<MatchDocument> = {}
     const options: QueryOptions<MatchDocument> = {
       populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
-      skip,
+      skipCount,
       limit: UPCOMING_MATCHES_LIMIT,
     }
 

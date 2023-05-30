@@ -166,13 +166,21 @@ export class RequestsService {
 
   async list(page: number, user: UserDocument) {
     const type = user.type
-    const skip = (page - 1) * REQUESTS_PAGINATION_LIMIT
+    const skipCount = (page - 1) * REQUESTS_PAGINATION_LIMIT
 
     const query: FilterQuery<RequestDocument> = type === 'manager' ? { team: user.team } : { user: user._id }
     const options: QueryOptions<RequestDocument> =
       type === 'manager'
-        ? { populate: { path: 'user', select: 'firstName lastName email' }, skip, limit: REQUESTS_PAGINATION_LIMIT }
-        : { populate: { path: 'manager', select: 'firstName lastName email' }, skip, limit: REQUESTS_PAGINATION_LIMIT }
+        ? {
+            populate: { path: 'user', select: 'firstName lastName email' },
+            skipCount,
+            limit: REQUESTS_PAGINATION_LIMIT,
+          }
+        : {
+            populate: { path: 'manager', select: 'firstName lastName email' },
+            skipCount,
+            limit: REQUESTS_PAGINATION_LIMIT,
+          }
 
     const requests = await this.RequestRepository.find(query, {}, options)
     return requests
