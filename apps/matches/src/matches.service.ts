@@ -112,4 +112,23 @@ export class MatchesService {
 
     return this.MatchRepository.find(query, projections, options)
   }
+
+  async listLiveMatches(page: number, teamId: Types.ObjectId) {
+    const skip = (page - 1) / UPCOMING_MATCHES_LIMIT
+
+    const query: FilterQuery<MatchDocument> = teamId
+      ? {
+          status: { $in: [MATCH_STATUS.LIVE, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK] },
+          teams: { $elemMatch: { $in: [teamId] } },
+        }
+      : { status: { $in: [MATCH_STATUS.LIVE, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK] } }
+    const projections: ProjectionType<MatchDocument> = {}
+    const options: QueryOptions<MatchDocument> = {
+      populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
+      skip,
+      limit: UPCOMING_MATCHES_LIMIT,
+    }
+
+    return this.MatchRepository.find(query, projections, options)
+  }
 }

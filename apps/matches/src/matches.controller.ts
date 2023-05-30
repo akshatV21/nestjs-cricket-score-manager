@@ -39,4 +39,14 @@ export class MatchesController {
     const matches = await this.matchesService.listUpcomingMatches(page, teamId)
     return { success: true, message: 'Matches fetched successfully', data: { matches } }
   }
+
+  @Get('live')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpListLiveMatches(
+    @Query('page', ParseIntPipe) page: number,
+    @Query('teamId', ParseObjectId) teamId: Types.ObjectId,
+  ) {
+    const matches = await this.matchesService.listLiveMatches(page, teamId)
+    return { success: true, message: 'Matches fetched successfully', data: { matches } }
+  }
 }
