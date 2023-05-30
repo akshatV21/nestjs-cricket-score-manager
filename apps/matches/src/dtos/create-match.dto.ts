@@ -7,7 +7,7 @@ export class CreateMatchDto {
   @IsNotEmpty()
   @IsMongoId()
   @Type(() => Types.ObjectId)
-  toTeamId: Types.ObjectId
+  opponentTeamId: Types.ObjectId
 
   @IsNotEmpty()
   @IsEnum(FORMATS)

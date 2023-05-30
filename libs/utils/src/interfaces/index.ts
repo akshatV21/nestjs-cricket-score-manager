@@ -99,3 +99,10 @@ export interface UserAddedToTeamMsgDto {
   chatId: string
   userId: string
 }
+
+export interface MatchRequestedDto {
+  fromTeamName: string
+  fromManagerId: string | Types.ObjectId
+  opponentManagerId: string | Types.ObjectId
+  matchId: string | Types.ObjectId
+}

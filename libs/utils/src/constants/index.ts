@@ -25,6 +25,7 @@ export const EVENTS = {
   ENDED_TYPING: 'ended-typing',
   MSG_RECIEVED: 'message-recieved',
   MSG_SEEN: 'message-seen',
+  MATCH_REQUESTED: 'match-requested',
 } as const
 
 export const CONTEXT_TYPES = {
