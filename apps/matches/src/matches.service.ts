@@ -1,7 +1,14 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
 import { MatchDocument, MatchRepository, TeamRepository, UserDocument } from '@lib/common'
-import { EVENTS, MATCH_STATUS, MatchRequestedDto, SERVICES, UPCOMING_MATCHES_LIMIT } from '@lib/utils'
+import {
+  EVENTS,
+  MATCH_STATUS,
+  MatchRequestedDto,
+  MatchScheduledDto,
+  SERVICES,
+  UPCOMING_MATCHES_LIMIT,
+} from '@lib/utils'
 import { FilterQuery, ProjectionType, QueryOptions, Types } from 'mongoose'
 import { ClientProxy } from '@nestjs/microservices'
 
@@ -103,6 +110,7 @@ export class MatchesService {
     const query: FilterQuery<MatchDocument> = teamId
       ? { status: MATCH_STATUS.UPCOMING, teams: { $elemMatch: { $in: [teamId] } } }
       : { status: MATCH_STATUS.UPCOMING }
+
     const projections: ProjectionType<MatchDocument> = {}
     const options: QueryOptions<MatchDocument> = {
       populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
@@ -122,6 +130,7 @@ export class MatchesService {
           teams: { $elemMatch: { $in: [teamId] } },
         }
       : { status: { $in: [MATCH_STATUS.LIVE, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK] } }
+
     const projections: ProjectionType<MatchDocument> = {}
     const options: QueryOptions<MatchDocument> = {
       populate: { path: 'teams squads.players', select: 'name firstName lastName email' },
@@ -130,5 +139,56 @@ export class MatchesService {
     }
 
     return this.MatchRepository.find(query, projections, options)
+  }
+
+  async schedule(matchId: Types.ObjectId, user: UserDocument, token: string) {
+    const match = await this.MatchRepository.findById(matchId, {}, { lean: true })
+
+    if (!match.teams.includes(user.team) || user._id.equals(match.requestBy))
+      throw new ForbiddenException('You are not authorized to make this request')
+
+    if (match.status !== 'requested')
+      throw new BadRequestException('Cannot make this change with current match status.')
+
+    const opponentTeamId = new Types.ObjectId(match.requestBy)
+    const userTeamId = new Types.ObjectId(user.team)
+
+    const requestMatchTime = new Date(match.time)
+    const matchRequestDate = `${requestMatchTime.getDate()}-${requestMatchTime.getMonth()}-${requestMatchTime.getFullYear()}`
+
+    const bothTeamsUpcomingMatches = await this.MatchRepository.find({
+      teams: { $elemMatch: { $in: [opponentTeamId, userTeamId] } },
+      status: MATCH_STATUS.UPCOMING,
+    })
+
+    bothTeamsUpcomingMatches.forEach(match => {
+      const matchTime = new Date(match.time)
+      const matchScheduledDate = `${matchTime.getDate()}-${matchTime.getMonth()}-${matchTime.getFullYear()}`
+
+      const pointingTeam = match.teams.includes(opponentTeamId) ? 'The other' : 'Your'
+      if (matchRequestDate === matchScheduledDate)
+        throw new BadRequestException(`${pointingTeam} team already has a match scheduled on the perticular day.`)
+    })
+
+    const getUserTeamPromise = this.TeamRepository.findById(userTeamId, { name: 1 }, { lean: true })
+    const getOpponentTeamPromise = this.TeamRepository.findById(opponentTeamId, { name: 1 }, { lean: true })
+    const updateMatchPromise = this.MatchRepository.update(matchId, { $set: { status: MATCH_STATUS.UPCOMING } })
+
+    const [userTeam, opponentTeam] = await Promise.all([getUserTeamPromise, getOpponentTeamPromise, updateMatchPromise])
+
+    const payload: MatchScheduledDto = {
+      body: {
+        fromManagerId: user._id,
+        fromTeamId: userTeamId,
+        fromTeamName: userTeam.name,
+        opponentManagerId: opponentTeam.manager,
+        opponentTeamId: opponentTeamId,
+        matchId,
+      },
+      token,
+    }
+
+    this.notificationsService.emit(EVENTS.MATCH_SCHEDULED, payload)
+    this.chatsService.emit(EVENTS.MATCH_SCHEDULED, payload)
   }
 }

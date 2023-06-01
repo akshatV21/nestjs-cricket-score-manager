@@ -26,6 +26,7 @@ export const EVENTS = {
   MSG_RECIEVED: 'message-recieved',
   MSG_SEEN: 'message-seen',
   MATCH_REQUESTED: 'match-requested',
+  MATCH_SCHEDULED: 'match-scheduled',
 } as const
 
 export const CONTEXT_TYPES = {
