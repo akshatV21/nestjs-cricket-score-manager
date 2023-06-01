@@ -27,6 +27,7 @@ export const EVENTS = {
   MSG_SEEN: 'message-seen',
   MATCH_REQUESTED: 'match-requested',
   MATCH_SCHEDULED: 'match-scheduled',
+  MATCH_REQUEST_DENIED: 'match-request-denied',
 } as const
 
 export const CONTEXT_TYPES = {
@@ -80,6 +81,7 @@ export const MESSAGE_STATUS = {
 
 export const MATCH_STATUS = {
   REQUESTED: 'requested',
+  DENIED: 'denied',
   UPCOMING: 'upcoming',
   TOSS: 'toss',
   LIVE: 'live',

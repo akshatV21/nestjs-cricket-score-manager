@@ -4,6 +4,7 @@ import { MatchDocument, MatchRepository, TeamRepository, UserDocument } from '@l
 import {
   EVENTS,
   MATCH_STATUS,
+  MatchRequestDeniedDto,
   MatchRequestedDto,
   MatchScheduledDto,
   SERVICES,
@@ -150,8 +151,8 @@ export class MatchesService {
     if (match.status !== 'requested')
       throw new BadRequestException('Cannot make this change with current match status.')
 
-    const opponentTeamId = new Types.ObjectId(match.requestBy)
     const userTeamId = new Types.ObjectId(user.team)
+    const opponentTeamId = new Types.ObjectId(match.requestBy)
 
     const requestMatchTime = new Date(match.time)
     const matchRequestDate = `${requestMatchTime.getDate()}-${requestMatchTime.getMonth()}-${requestMatchTime.getFullYear()}`
@@ -190,5 +191,39 @@ export class MatchesService {
 
     this.notificationsService.emit(EVENTS.MATCH_SCHEDULED, payload)
     this.chatsService.emit(EVENTS.MATCH_SCHEDULED, payload)
+  }
+
+  async deny(matchId: Types.ObjectId, user: UserDocument, token: string) {
+    const match = await this.MatchRepository.findById(matchId, {}, { lean: true })
+
+    if (!match.teams.includes(user.team) || user._id.equals(match.requestBy))
+      throw new ForbiddenException('You are not authorized to make this request')
+
+    if (match.status !== 'requested')
+      throw new BadRequestException('Cannot make this change with current match status.')
+
+    const opponentTeamId = new Types.ObjectId(match.requestBy)
+    const userTeamId = new Types.ObjectId(user.team)
+
+    const getUserTeamPromise = this.TeamRepository.findById(userTeamId, { name: 1 }, { lean: true })
+    const getOpponentTeamPromise = this.TeamRepository.findById(opponentTeamId, { name: 1 }, { lean: true })
+    const updateMatchPromise = this.MatchRepository.update(matchId, { $set: { status: MATCH_STATUS.DENIED } })
+
+    const [userTeam, opponentTeam] = await Promise.all([getUserTeamPromise, getOpponentTeamPromise, updateMatchPromise])
+
+    const payload: MatchRequestDeniedDto = {
+      body: {
+        fromManagerId: user._id,
+        fromTeamId: userTeamId,
+        fromTeamName: userTeam.name,
+        opponentManagerId: opponentTeam.manager,
+        opponentTeamId: opponentTeamId,
+        matchId,
+      },
+      token,
+    }
+
+    this.notificationsService.emit(EVENTS.MATCH_REQUEST_DENIED, payload)
+    this.chatsService.emit(EVENTS.MATCH_REQUEST_DENIED, payload)
   }
 }

@@ -60,4 +60,15 @@ export class MatchesController {
     await this.matchesService.schedule(matchId, user, token)
     return { success: true, message: 'Match scheduled successfully' }
   }
+
+  @Patch('deny/:matchId')
+  @Auth({ types: ['manager'] })
+  async httpDenyRequestedMatch(
+    @Param('matchId', ParseObjectId) matchId: Types.ObjectId,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    await this.matchesService.deny(matchId, user, token)
+    return { success: true, message: 'Match requedt denied successfully' }
+  }
 }
