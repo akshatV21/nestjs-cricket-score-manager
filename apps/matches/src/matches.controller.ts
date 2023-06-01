@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common'
 import { MatchesService } from './matches.service'
 import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
@@ -48,5 +48,16 @@ export class MatchesController {
   ) {
     const matches = await this.matchesService.listLiveMatches(page, teamId)
     return { success: true, message: 'Matches fetched successfully', data: { matches } }
+  }
+
+  @Patch('schedule/:matchId')
+  @Auth({ types: ['manager'] })
+  async httpScheduleRequestedMatch(
+    @Param('matchId', ParseObjectId) matchId: Types.ObjectId,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    await this.matchesService.schedule(matchId, user, token)
+    return { success: true, message: 'Match scheduled successfully' }
   }
 }
