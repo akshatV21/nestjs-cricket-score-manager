@@ -114,3 +114,10 @@ export interface MatchRequestedDto extends BaseDto {
 export interface MatchScheduledDto extends MatchRequestedDto {}
 
 export interface MatchRequestDeniedDto extends MatchRequestedDto {}
+
+export interface MatchSquadUpdatedDto extends BaseDto {
+  body: {
+    userTeam: string | Types.ObjectId
+    opponentTeam: string | Types.ObjectId
+  }
+}

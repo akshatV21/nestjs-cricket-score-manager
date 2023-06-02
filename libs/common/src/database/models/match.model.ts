@@ -40,4 +40,24 @@ export class Match {
   result?: Result
 }
 
-export const MatchSchema = SchemaFactory.createForClass(Match)
+const MatchSchema = SchemaFactory.createForClass(Match)
+
+MatchSchema.pre('save', function (next) {
+  if (!this.isModified('teams')) return next()
+
+  const squads: Squad[] = [
+    {
+      team: this.teams[0],
+      players: [],
+    },
+    {
+      team: this.teams[1],
+      players: [],
+    },
+  ]
+  this.squads = squads
+
+  return next()
+})
+
+export { MatchSchema }

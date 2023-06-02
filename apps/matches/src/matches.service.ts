@@ -3,15 +3,18 @@ import { CreateMatchDto } from './dtos/create-match.dto'
 import { MatchDocument, MatchRepository, TeamRepository, UserDocument } from '@lib/common'
 import {
   EVENTS,
+  MATCH_SQUAD_LIMIT,
   MATCH_STATUS,
   MatchRequestDeniedDto,
   MatchRequestedDto,
   MatchScheduledDto,
+  MatchSquadUpdatedDto,
   SERVICES,
   UPCOMING_MATCHES_LIMIT,
 } from '@lib/utils'
-import { FilterQuery, ProjectionType, QueryOptions, Types } from 'mongoose'
+import { FilterQuery, ProjectionType, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { ClientProxy } from '@nestjs/microservices'
+import { UpdateSquadDto } from './dtos/update-squad.dto'
 
 @Injectable()
 export class MatchesService {
@@ -225,5 +228,42 @@ export class MatchesService {
 
     this.notificationsService.emit(EVENTS.MATCH_REQUEST_DENIED, payload)
     this.chatsService.emit(EVENTS.MATCH_REQUEST_DENIED, payload)
+  }
+
+  async squads({ matchId, players }: UpdateSquadDto, user: UserDocument, token: string) {
+    const getTeamPromise = this.TeamRepository.findById(user.team, {}, { lean: true })
+    const getMatchPromise = this.MatchRepository.findById(matchId, {}, { lean: true })
+
+    const [team, match] = await Promise.all([getTeamPromise, getMatchPromise])
+
+    if (!match.teams.includes(user.team)) throw new ForbiddenException('You are not allowed to make this request.')
+
+    const noOfPlayersToAdd = players.length
+    const noOfPlayersAlreadyAdded = match.squads.find(squad => squad.team === user.team).players.length
+    const noOfPlayerSlotsRemaining = MATCH_SQUAD_LIMIT - noOfPlayersAlreadyAdded
+
+    if (noOfPlayersAlreadyAdded >= MATCH_SQUAD_LIMIT)
+      throw new BadRequestException('Your squad already consists of 11 players.')
+
+    if (noOfPlayersToAdd > noOfPlayerSlotsRemaining)
+      throw new BadRequestException(
+        `Your squad already consists of ${noOfPlayersAlreadyAdded} players, so you can only add now ${noOfPlayerSlotsRemaining} players.`,
+      )
+
+    this.MatchRepository.update(
+      matchId,
+      { $push: { 'squads.$[squad].players': { $each: players } } },
+      { arrayFilters: [{ 'squad.team': team._id }], new: true },
+    )
+
+    const payload: MatchSquadUpdatedDto = {
+      body: {
+        userTeam: user.team,
+        opponentTeam: match.teams.find(id => user.team !== id),
+      },
+      token,
+    }
+
+    this.notificationsService.emit(EVENTS.MATCH_SQUAD_UPDATED, payload)
   }
 }

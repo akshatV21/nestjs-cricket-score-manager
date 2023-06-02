@@ -4,6 +4,7 @@ import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
 import { ParseObjectId } from '@lib/utils'
 import { Types } from 'mongoose'
+import { UpdateSquadDto } from './dtos/update-squad.dto'
 
 @Controller('matches')
 export class MatchesController {
@@ -69,6 +70,17 @@ export class MatchesController {
     @Token() token: string,
   ) {
     await this.matchesService.deny(matchId, user, token)
-    return { success: true, message: 'Match requedt denied successfully' }
+    return { success: true, message: 'Match request denied successfully' }
+  }
+
+  @Patch('squads')
+  @Auth({ types: ['manager'] })
+  async httpUpdateMatchSquad(
+    @Body() updateSquadDto: UpdateSquadDto,
+    @ReqUser() user: UserDocument,
+    @Token() token: string,
+  ) {
+    await this.matchesService.squads(updateSquadDto, user, token)
+    return { success: true, message: 'Match sqaud updated successfully' }
   }
 }

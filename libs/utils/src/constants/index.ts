@@ -28,6 +28,7 @@ export const EVENTS = {
   MATCH_REQUESTED: 'match-requested',
   MATCH_SCHEDULED: 'match-scheduled',
   MATCH_REQUEST_DENIED: 'match-request-denied',
+  MATCH_SQUAD_UPDATED: 'match-squad-updated',
 } as const
 
 export const CONTEXT_TYPES = {
@@ -61,6 +62,7 @@ export const TEAMS_PAGINATION_LIMIT = 5
 export const REQUESTS_PAGINATION_LIMIT = 5
 export const CHATS_PAGENATION_LIMIT = 4
 export const UPCOMING_MATCHES_LIMIT = 10
+export const MATCH_SQUAD_LIMIT = 11
 
 export const CHAT_TYPE = {
   IN_TEAM: 'in-team',

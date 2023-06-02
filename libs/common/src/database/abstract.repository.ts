@@ -30,8 +30,8 @@ export abstract class AbstractRepository<T extends Document, S extends Record<st
     return this.AbstractModel.findById(new Types.ObjectId(id), projection, options)
   }
 
-  async update(id: string | Types.ObjectId, updateDto: UpdateQuery<T>) {
-    return this.AbstractModel.findByIdAndUpdate(id, updateDto, { new: true })
+  async update(id: string | Types.ObjectId, updateDto: UpdateQuery<T>, options: QueryOptions<T> = { new: true }) {
+    return this.AbstractModel.findByIdAndUpdate(id, updateDto, options)
   }
 
   async updateByQuery(query: FilterQuery<T>, updateDto: UpdateQuery<T>) {
