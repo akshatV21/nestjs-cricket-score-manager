@@ -29,6 +29,7 @@ export const EVENTS = {
   MATCH_SCHEDULED: 'match-scheduled',
   MATCH_REQUEST_DENIED: 'match-request-denied',
   MATCH_SQUAD_UPDATED: 'match-squad-updated',
+  MATCH_STATUS_UPDATED: 'match-status-updated',
 } as const
 
 export const CONTEXT_TYPES = {
