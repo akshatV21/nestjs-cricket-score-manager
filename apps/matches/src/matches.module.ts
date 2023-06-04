@@ -17,8 +17,9 @@ import {
   UserRepository,
   UserSchema,
 } from '@lib/common'
-import { SERVICES } from '@lib/utils'
+import { SERVICES, SocketSessions } from '@lib/utils'
 import { APP_GUARD } from '@nestjs/core'
+import { MatchesGateway } from './matches.gateway'
 
 @Module({
   imports: [
@@ -45,7 +46,9 @@ import { APP_GUARD } from '@nestjs/core'
   ],
   controllers: [MatchesController],
   providers: [
+    SocketSessions,
     MatchesService,
+    MatchesGateway,
     UserRepository,
     TeamRepository,
     { provide: APP_GUARD, useClass: Authorize },
