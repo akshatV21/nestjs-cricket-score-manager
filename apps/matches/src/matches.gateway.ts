@@ -7,6 +7,7 @@ import {
   MatchStatusUpdatedDto,
   SERVICES,
   SocketSessions,
+  TossUpdatedDto,
   catchAuthErrors,
 } from '@lib/utils'
 import { Inject } from '@nestjs/common'
@@ -59,5 +60,10 @@ export class MatchesGateway {
     const sockets = this.socketSessions.getSockets()
     sockets.forEach(socket => socket.join(matchId as string))
     this.server.emit(EVENTS.NEW_LIVE_MATCH, { matchId, status })
+  }
+
+  @OnEvent(EVENTS.TOSS_UPDATED)
+  handleTossUpdatedEvent(payload: TossUpdatedDto) {
+    this.server.emit(payload.matchId as string, payload)
   }
 }
