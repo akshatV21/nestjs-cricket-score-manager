@@ -1,3 +1,4 @@
+import { Auth } from '@lib/common'
 import {
   AuthenticatedSocket,
   AuthorizeDto,
@@ -9,7 +10,7 @@ import {
 } from '@lib/utils'
 import { Inject } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
-import { WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets'
+import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets'
 import { lastValueFrom } from 'rxjs'
 import { Server } from 'socket.io'
 
@@ -39,5 +40,14 @@ export class MatchesGateway {
 
   handleDisconnect(socket: AuthenticatedSocket) {
     this.socketSessions.removeSocket(socket.entityId)
+  }
+
+  @SubscribeMessage('')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  handleJoinLiveMatchesEvent(@MessageBody() { userId }: Record<'userId', string>) {
+    const liveMatches = [...this.server.of('/').adapter.rooms].map(([name, value]) => name)
+    const socket = this.socketSessions.getSocket(userId)
+
+    if (socket) socket.join(liveMatches)
   }
 }

@@ -30,6 +30,8 @@ export const EVENTS = {
   MATCH_REQUEST_DENIED: 'match-request-denied',
   MATCH_SQUAD_UPDATED: 'match-squad-updated',
   MATCH_STATUS_UPDATED: 'match-status-updated',
+  JOIN_LIVE_MATCHES: 'join-live-matches',
+  NEW_LIVE_MATCH: 'new-live-match',
 } as const
 
 export const CONTEXT_TYPES = {
