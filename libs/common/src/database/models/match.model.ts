@@ -13,6 +13,9 @@ class TossSchema {
   wonBy: Types.ObjectId
 
   @Prop({ default: null, type: String })
+  called: TossValue
+
+  @Prop({ default: null, type: String })
   landed: TossValue
 
   @Prop({ default: null, type: String })
