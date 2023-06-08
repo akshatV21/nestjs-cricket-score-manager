@@ -9,12 +9,16 @@ import {
   MatchRequestedDto,
   MatchScheduledDto,
   MatchSquadUpdatedDto,
+  MatchStatus,
+  MatchStatusUpdatedDto,
   SERVICES,
   UPCOMING_MATCHES_LIMIT,
 } from '@lib/utils'
 import { FilterQuery, ProjectionType, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { ClientProxy } from '@nestjs/microservices'
 import { UpdateSquadDto } from './dtos/update-squad.dto'
+import { UpdateMatchStatusDto } from './dtos/update-status.dto'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
 export class MatchesService {
@@ -23,6 +27,7 @@ export class MatchesService {
     private readonly TeamRepository: TeamRepository,
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private notificationsService: ClientProxy,
     @Inject(SERVICES.CHATS_SERVICE) private chatsService: ClientProxy,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create({ opponentTeamId, format, time }: CreateMatchDto, user: UserDocument, token: string) {
@@ -265,5 +270,26 @@ export class MatchesService {
     }
 
     this.notificationsService.emit(EVENTS.MATCH_SQUAD_UPDATED, payload)
+  }
+
+  async status({ status }: UpdateMatchStatusDto, match: MatchDocument) {
+    this.canUpdateStatus(match.status, status)
+    await this.MatchRepository.update(match._id, { $set: { status } })
+
+    const payload: MatchStatusUpdatedDto = { matchId: match._id.toString(), status }
+    this.eventEmitter.emit(EVENTS.MATCH_STATUS_UPDATED, payload)
+  }
+
+  async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
+    if (currentStatus === updateToStatus)
+      throw new BadRequestException(`The match status is already set to the ${currentStatus}.`)
+
+    if (updateToStatus === 'toss' && currentStatus !== 'requested')
+      throw new BadRequestException(`Cannot change current match status of ${currentStatus} to ${updateToStatus}.`)
+
+    if (updateToStatus === 'live') {
+      if (currentStatus !== 'toss' && currentStatus !== 'innings-break')
+        throw new BadRequestException(`Cannot change current match status of ${currentStatus} to ${updateToStatus}.`)
+    }
   }
 }

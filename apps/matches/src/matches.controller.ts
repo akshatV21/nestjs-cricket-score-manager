@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common'
 import { MatchesService } from './matches.service'
-import { Auth, ReqUser, Token, UserDocument } from '@lib/common'
+import { Auth, MatchDocument, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
 import { ParseObjectId } from '@lib/utils'
 import { Types } from 'mongoose'
 import { UpdateSquadDto } from './dtos/update-squad.dto'
+import { UpdateMatchStatusDto } from './dtos/update-status.dto'
+import { Match } from './decorators/match.decorator'
 
 @Controller('matches')
 export class MatchesController {
@@ -82,5 +84,12 @@ export class MatchesController {
   ) {
     await this.matchesService.squads(updateSquadDto, user, token)
     return { success: true, message: 'Match sqaud updated successfully' }
+  }
+
+  @Patch('status')
+  @Auth({ types: ['scorer'] })
+  async httpUpdateMatchStatus(@Body() updaeMatchStatusDto: UpdateMatchStatusDto, @Match() match: MatchDocument) {
+    await this.matchesService.status(updaeMatchStatusDto, match)
+    return { success: true, message: 'Match status updated successfully' }
   }
 }
