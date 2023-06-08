@@ -12,6 +12,7 @@ import {
   MatchStatus,
   MatchStatusUpdatedDto,
   SERVICES,
+  TossUpdatedDto,
   UPCOMING_MATCHES_LIMIT,
 } from '@lib/utils'
 import { FilterQuery, ProjectionType, QueryOptions, Types, UpdateQuery } from 'mongoose'
@@ -19,6 +20,7 @@ import { ClientProxy } from '@nestjs/microservices'
 import { UpdateSquadDto } from './dtos/update-squad.dto'
 import { UpdateMatchStatusDto } from './dtos/update-status.dto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { UpdateTossDto } from './dtos/update-toss.dto'
 
 @Injectable()
 export class MatchesService {
@@ -280,7 +282,25 @@ export class MatchesService {
     this.eventEmitter.emit(EVENTS.MATCH_STATUS_UPDATED, payload)
   }
 
-  async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
+  async toss(updateTossDto: UpdateTossDto, match: MatchDocument) {
+    if (match.status !== 'toss')
+      throw new BadRequestException('Cannot update toss when current match status in not - "TOSS"')
+
+    await this.MatchRepository.update(match._id, {
+      $set: {
+        toss: {
+          wonBy: updateTossDto.wonBy,
+          called: updateTossDto.called,
+          landed: updateTossDto.landed,
+          elected: updateTossDto.elected,
+        },
+      },
+    })
+
+    this.eventEmitter.emit(EVENTS.TOSS_UPDATED, updateTossDto)
+  }
+
+  private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
     if (currentStatus === updateToStatus)
       throw new BadRequestException(`The match status is already set to the ${currentStatus}.`)
 

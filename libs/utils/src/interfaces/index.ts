@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io'
-import { MatchStatus, RequestType, UserType } from '../types'
+import { MatchStatus, RequestType, TossValue, TossWinningOption, UserType } from '../types'
 import { ChatDocument, MessageDocument, RequestDocument } from '@lib/common'
 import { Types } from 'mongoose'
 
@@ -125,4 +125,12 @@ export interface MatchSquadUpdatedDto extends BaseDto {
 export class MatchStatusUpdatedDto {
   matchId: string | Types.ObjectId
   status: MatchStatus
+}
+
+export class TossUpdatedDto {
+  matchId: string | Types.ObjectId
+  wonBy: string | Types.ObjectId
+  called: TossValue
+  landed: TossValue
+  elected: TossWinningOption
 }

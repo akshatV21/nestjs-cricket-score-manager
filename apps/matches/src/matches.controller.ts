@@ -7,6 +7,7 @@ import { Types } from 'mongoose'
 import { UpdateSquadDto } from './dtos/update-squad.dto'
 import { UpdateMatchStatusDto } from './dtos/update-status.dto'
 import { Match } from './decorators/match.decorator'
+import { UpdateTossDto } from './dtos/update-toss.dto'
 
 @Controller('matches')
 export class MatchesController {
@@ -91,5 +92,12 @@ export class MatchesController {
   async httpUpdateMatchStatus(@Body() updaeMatchStatusDto: UpdateMatchStatusDto, @Match() match: MatchDocument) {
     await this.matchesService.status(updaeMatchStatusDto, match)
     return { success: true, message: 'Match status updated successfully' }
+  }
+
+  @Patch('toss')
+  @Auth({ types: ['scorer'] })
+  async httpUpdateMatchToss(@Body() updateTossDto: UpdateTossDto, @Match() match: MatchDocument) {
+    await this.matchesService.toss(updateTossDto, match)
+    return { success: true, message: 'Match toss updated successfully' }
   }
 }
