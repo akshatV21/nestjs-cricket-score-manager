@@ -11,6 +11,7 @@ import {
   MatchSquadUpdatedDto,
   MatchStatus,
   MatchStatusUpdatedDto,
+  NewBallDto,
   SERVICES,
   TossUpdatedDto,
   UPCOMING_MATCHES_LIMIT,
@@ -137,10 +138,26 @@ export class MatchesService {
 
     const query: FilterQuery<MatchDocument> = teamId
       ? {
-          status: { $in: [MATCH_STATUS.LIVE, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK] },
+          status: {
+            $in: [
+              MATCH_STATUS.FIRST_INNINGS,
+              MATCH_STATUS.SECOND_INNINGS,
+              MATCH_STATUS.TOSS,
+              MATCH_STATUS.INNINGS_BREAK,
+            ],
+          },
           teams: { $elemMatch: { $in: [teamId] } },
         }
-      : { status: { $in: [MATCH_STATUS.LIVE, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK] } }
+      : {
+          status: {
+            $in: [
+              MATCH_STATUS.FIRST_INNINGS,
+              MATCH_STATUS.SECOND_INNINGS,
+              MATCH_STATUS.TOSS,
+              MATCH_STATUS.INNINGS_BREAK,
+            ],
+          },
+        }
 
     const projections: ProjectionType<MatchDocument> = {}
     const options: QueryOptions<MatchDocument> = {
@@ -300,6 +317,41 @@ export class MatchesService {
     this.eventEmitter.emit(EVENTS.TOSS_UPDATED, updateTossDto)
   }
 
+  async newBallBowled(newBallDto: NewBallDto, match: MatchDocument) {
+    if (match.status !== 'first-innings' && match.status !== 'second-innings')
+      throw new BadRequestException(
+        'Cannot update new ball when current match is not - "first-innings" or "second-innings"',
+      )
+
+    let score = newBallDto.runs
+    score += newBallDto.isNoBall ? 1 : 0
+    score += newBallDto.isWide ? 1 : 0
+
+    const isWicket = newBallDto.isWicket && !newBallDto.isNoBall
+    const currentInningsKey = match.status === 'first-innings' ? 'firstInnings' : 'secondInnings'
+    const boundaryType = newBallDto.isBoundary && newBallDto.runs === 4 ? 'fours' : 'sixes'
+
+    if (newBallDto.over < match[currentInningsKey].overs) throw new BadRequestException()
+
+    const ballUpdateQuery: UpdateQuery<MatchDocument> = {
+      $inc: {
+        [`${currentInningsKey}.runs`]: score,
+        [`${currentInningsKey}.wickets`]: isWicket ? 1 : 0,
+        [`${currentInningsKey}.noballs`]: newBallDto.isNoBall ? 1 : 0,
+        [`${currentInningsKey}.wides`]: newBallDto.isWide ? 1 : 0,
+        [`${currentInningsKey}.byes`]: newBallDto.isByes ? score : 0,
+        [`${currentInningsKey}.fours`]: boundaryType === 'fours' ? 1 : 0,
+        [`${currentInningsKey}.sixes`]: boundaryType === 'sixes' ? 1 : 0,
+      },
+      $set: {
+        [`${currentInningsKey}.overs`]: newBallDto.over,
+        [`${currentInningsKey}.balls`]: newBallDto.ball,
+      },
+    }
+
+    await this.MatchRepository.update(match._id, ballUpdateQuery)
+  }
+
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
     if (currentStatus === updateToStatus)
       throw new BadRequestException(`The match status is already set to the ${currentStatus}.`)
@@ -307,7 +359,7 @@ export class MatchesService {
     if (updateToStatus === 'toss' && currentStatus !== 'requested')
       throw new BadRequestException(`Cannot change current match status of ${currentStatus} to ${updateToStatus}.`)
 
-    if (updateToStatus === 'live') {
+    if (updateToStatus === 'first-innings') {
       if (currentStatus !== 'toss' && currentStatus !== 'innings-break')
         throw new BadRequestException(`Cannot change current match status of ${currentStatus} to ${updateToStatus}.`)
     }

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '
 import { MatchesService } from './matches.service'
 import { Auth, MatchDocument, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
-import { ParseObjectId } from '@lib/utils'
+import { NewBallDto, ParseObjectId } from '@lib/utils'
 import { Types } from 'mongoose'
 import { UpdateSquadDto } from './dtos/update-squad.dto'
 import { UpdateMatchStatusDto } from './dtos/update-status.dto'
@@ -99,5 +99,12 @@ export class MatchesController {
   async httpUpdateMatchToss(@Body() updateTossDto: UpdateTossDto, @Match() match: MatchDocument) {
     await this.matchesService.toss(updateTossDto, match)
     return { success: true, message: 'Match toss updated successfully' }
+  }
+
+  @Patch('newBall')
+  @Auth({ types: ['scorer'] })
+  async httpNewBallBowled(@Body() newBallDto: NewBallDto, @Match() match: MatchDocument) {
+    await this.matchesService.newBallBowled(newBallDto, match)
+    return { success: true, message: 'Match new ball updated successfully' }
   }
 }
