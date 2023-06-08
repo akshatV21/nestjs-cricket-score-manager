@@ -8,6 +8,8 @@ import {
   REQUEST_STATUS,
   REQUEST_TYPES,
   SERVICES,
+  TOSS_VALUES,
+  TOSS_WINNING_OPTIONS,
   USER_TYPE,
   WON_BY_VALUES,
 } from '../constants'
@@ -35,3 +37,7 @@ export type MatchStatus = ObjectValuesUnion<typeof MATCH_STATUS>
 export type Format = ObjectValuesUnion<typeof FORMATS>
 
 export type WonBy = ObjectValuesUnion<typeof WON_BY_VALUES>
+
+export type TossValue = ObjectValuesUnion<typeof TOSS_VALUES>
+
+export type TossWinningOption = ObjectValuesUnion<typeof TOSS_WINNING_OPTIONS>

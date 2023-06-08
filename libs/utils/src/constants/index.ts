@@ -106,3 +106,13 @@ export const WON_BY_VALUES = {
   DEFENDING: 'defending',
   CHASING: 'chasing',
 } as const
+
+export const TOSS_VALUES = {
+  HEADS: 'heads',
+  TAILS: 'tails',
+} as const
+
+export const TOSS_WINNING_OPTIONS = {
+  BATTING: 'battling',
+  BOWLING: 'bowling',
+} as const

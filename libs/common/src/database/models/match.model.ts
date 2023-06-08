@@ -1,4 +1,4 @@
-import { Format, MATCH_STATUS, MatchStatus } from '@lib/utils'
+import { Format, MATCH_STATUS, MatchStatus, TossValue, TossWinningOption } from '@lib/utils'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
 import { Squad } from './squad.schema'
@@ -7,13 +7,25 @@ import { Result } from './result.schema'
 
 export type MatchDocument = Match & Document
 
+@Schema()
+class TossSchema {
+  @Prop({ default: null, ref: 'Team' })
+  wonBy: Types.ObjectId
+
+  @Prop({ default: null, type: String })
+  landed: TossValue
+
+  @Prop({ default: null, type: String })
+  elected: TossWinningOption
+}
+
 @Schema({ timestamps: true })
 export class Match {
   @Prop({ required: true, ref: 'Team' })
   teams: Types.ObjectId[]
 
-  @Prop({ ref: 'Team' })
-  toss?: Types.ObjectId
+  @Prop({ default: { wonBy: null, landed: null, elected: null }, ref: 'Team' })
+  toss?: TossSchema
 
   @Prop({ default: MATCH_STATUS.REQUESTED, type: String })
   status?: MatchStatus
