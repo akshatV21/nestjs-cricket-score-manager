@@ -384,7 +384,8 @@ export class MatchesService {
       new: true,
     }
 
-    await this.MatchRepository.update(match._id, ballUpdateQuery, updateOptions)
+    const updatedMatch = await this.MatchRepository.update(match._id, ballUpdateQuery, updateOptions)
+    this.eventEmitter.emit(EVENTS.NEW_BALL_BOWLED, { ...newBallDto, batters: updatedMatch.live.batters })
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {

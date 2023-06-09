@@ -33,6 +33,7 @@ export const EVENTS = {
   JOIN_LIVE_MATCHES: 'join-live-matches',
   NEW_LIVE_MATCH: 'new-live-match',
   TOSS_UPDATED: 'toss-updated',
+  NEW_BALL_BOWLED: 'new-ball-bowled',
 } as const
 
 export const CONTEXT_TYPES = {

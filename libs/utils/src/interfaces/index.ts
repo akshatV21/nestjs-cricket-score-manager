@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io'
 import { MatchStatus, RequestType, TossValue, TossWinningOption, UserType } from '../types'
-import { ChatDocument, MessageDocument, RequestDocument } from '@lib/common'
+import { ChatDocument, LiveBattersSchema, MessageDocument, RequestDocument } from '@lib/common'
 import { Types } from 'mongoose'
 
 export interface AuthOptions {
@@ -133,4 +133,19 @@ export class TossUpdatedDto {
   called: TossValue
   landed: TossValue
   elected: TossWinningOption
+}
+
+export class NewBallBowledDto {
+  matchId: Types.ObjectId | string
+  over: number
+  ball: number
+  runs: number
+  isBoundary: boolean
+  isByes: boolean
+  isNoBall: boolean
+  isWide: boolean
+  isWicket: boolean
+  batter: Types.ObjectId | string
+  bowler: Types.ObjectId | string
+  batters: LiveBattersSchema[]
 }
