@@ -370,9 +370,10 @@ export class MatchesService {
           ? true
           : false,
       },
-      $unset: {
-        [`${currentInningsKey}.live.batters.$[wicketOfBatter]`]: '',
-      },
+    }
+
+    if (newBallDto.isWicket) {
+      ballUpdateQuery.$unset = { [`${currentInningsKey}.live.batters.$[wicketOfBatter]`]: '' }
     }
 
     const updateOptions: QueryOptions<MatchDocument> = {
