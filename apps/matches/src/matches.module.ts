@@ -34,6 +34,7 @@ import { MatchesGateway } from './matches.gateway'
         RMQ_TEAMS_QUEUE: Joi.string().required(),
         RMQ_CHATS_QUEUE: Joi.string().required(),
         RMQ_MATCHES_QUEUE: Joi.string().required(),
+        RMQ_STATISTICS_QUEUE: Joi.string().required(),
       }),
     }),
     RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE, SERVICES.CHATS_SERVICE]),

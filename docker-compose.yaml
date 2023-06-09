@@ -64,6 +64,22 @@ services:
       - mongo-server
       - rmq-server
 
+  statistics:
+    build:
+      context: .
+      dockerfile: ./apps/statistics/Dockerfile
+      target: development
+    command: npm run start:dev statistics
+    ports:
+      - '8088:8088'
+    volumes:
+      - .:/app
+    env_file:
+      - ./apps/statistics/.env
+    depends_on:
+      - mongo-server
+      - rmq-server
+
   notifications:
     build:
       context: .
