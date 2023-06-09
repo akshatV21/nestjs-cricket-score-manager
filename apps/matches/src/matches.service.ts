@@ -340,6 +340,7 @@ export class MatchesService {
     const onStrikeBatterIndex = match.live.batters.findIndex(batter => batter.isOnStrike)
     const onStrikeBatterPerformanceId = match.live.batters[onStrikeBatterIndex].performance
     const onNonStrikeBatterPerformanceId = match.live.batters[onStrikeBatterIndex === 0 ? 1 : 0].performance
+    const wicketOfBatterPerformanceId = match.live.batters.find(batter => newBallDto.batter.equals(batter.player))
 
     const ballUpdateQuery: UpdateQuery<MatchDocument> = {
       $inc: {
@@ -369,12 +370,16 @@ export class MatchesService {
           ? true
           : false,
       },
+      $unset: {
+        [`${currentInningsKey}.live.batters.$[wicketOfBatter]`]: '',
+      },
     }
 
     const updateOptions: QueryOptions<MatchDocument> = {
       arrayFilters: [
         { 'batterOnStrike.performance': onStrikeBatterPerformanceId },
         { 'batterOnNonStrike.performance': onNonStrikeBatterPerformanceId },
+        { 'wicketOfBatter.player': wicketOfBatterPerformanceId },
       ],
       new: true,
     }

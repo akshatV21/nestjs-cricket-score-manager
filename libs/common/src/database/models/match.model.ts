@@ -27,6 +27,9 @@ export class LiveBattersSchema {
   @Prop({ default: null, ref: 'Performance' })
   performance: Types.ObjectId
 
+  @Prop({ default: null, ref: 'User' })
+  player: Types.ObjectId
+
   @Prop({ default: null })
   isOnStrike: boolean
 }
