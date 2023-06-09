@@ -72,6 +72,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/matches/tsconfig.app.json"
       }
+    },
+    "statistics": {
+      "type": "application",
+      "root": "apps/statistics",
+      "entryFile": "main",
+      "sourceRoot": "apps/statistics/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/statistics/tsconfig.app.json"
+      }
     }
   }
 }
