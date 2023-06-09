@@ -22,6 +22,24 @@ class TossSchema {
   elected: TossWinningOption
 }
 
+@Schema()
+export class LiveBattersSchema {
+  @Prop({ default: null, ref: 'Performance' })
+  performance: Types.ObjectId
+
+  @Prop({ default: null })
+  isOnStrike: boolean
+}
+
+@Schema()
+class LiveStats {
+  @Prop({ default: [] })
+  batters: LiveBattersSchema[]
+
+  @Prop({ default: [] })
+  bowler: Types.ObjectId
+}
+
 @Schema({ timestamps: true })
 export class Match {
   @Prop({ required: true, ref: 'Team' })
@@ -50,6 +68,9 @@ export class Match {
 
   @Prop({ default: {} })
   secondInnings?: Inning
+
+  @Prop({ default: {} })
+  live?: LiveStats
 
   @Prop({ default: {} })
   result?: Result

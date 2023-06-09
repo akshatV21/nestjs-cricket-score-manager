@@ -274,7 +274,7 @@ export class MatchesService {
         `Your squad already consists of ${noOfPlayersAlreadyAdded} players, so you can only add now ${noOfPlayerSlotsRemaining} players.`,
       )
 
-    this.MatchRepository.update(
+    await this.MatchRepository.update(
       matchId,
       { $push: { 'squads.$[squad].players': { $each: players } } },
       { arrayFilters: [{ 'squad.team': team._id }], new: true },
@@ -333,6 +333,14 @@ export class MatchesService {
 
     if (newBallDto.over < match[currentInningsKey].overs) throw new BadRequestException()
 
+    const isOversLastBall = newBallDto.ball === 6
+    const strikeHasChanged = newBallDto.runs % 2 !== 0
+    const strikeChangedOnOversLastBall = strikeHasChanged && isOversLastBall
+
+    const onStrikeBatterIndex = match.live.batters.findIndex(batter => batter.isOnStrike)
+    const onStrikeBatterPerformanceId = match.live.batters[onStrikeBatterIndex].performance
+    const onNonStrikeBatterPerformanceId = match.live.batters[onStrikeBatterIndex === 0 ? 1 : 0].performance
+
     const ballUpdateQuery: UpdateQuery<MatchDocument> = {
       $inc: {
         [`${currentInningsKey}.runs`]: score,
@@ -346,10 +354,32 @@ export class MatchesService {
       $set: {
         [`${currentInningsKey}.overs`]: newBallDto.over,
         [`${currentInningsKey}.balls`]: newBallDto.ball,
+        [`${currentInningsKey}.live.batters.$[batterOnStrike].isOnStrike`]: strikeHasChanged
+          ? strikeChangedOnOversLastBall
+            ? true
+            : false
+          : isOversLastBall
+          ? false
+          : true,
+        [`${currentInningsKey}.live.batters.$[batterOnNonStrike].isOnStrike`]: strikeHasChanged
+          ? strikeChangedOnOversLastBall
+            ? false
+            : true
+          : isOversLastBall
+          ? true
+          : false,
       },
     }
 
-    await this.MatchRepository.update(match._id, ballUpdateQuery)
+    const updateOptions: QueryOptions<MatchDocument> = {
+      arrayFilters: [
+        { 'batterOnStrike.performance': onStrikeBatterPerformanceId },
+        { 'batterOnNonStrike.performance': onNonStrikeBatterPerformanceId },
+      ],
+      new: true,
+    }
+
+    await this.MatchRepository.update(match._id, ballUpdateQuery, updateOptions)
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
