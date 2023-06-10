@@ -1,13 +1,13 @@
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { StatisticsModule } from './statistics.module'
 import { ConfigService } from '@nestjs/config'
 import { RmqService } from '@lib/common'
 import * as morgan from 'morgan'
 import helmet from 'helmet'
+import { AppModule } from './app.module'
 
 async function bootstrap() {
-  const app = await NestFactory.create(StatisticsModule, { cors: { origin: '*' } })
+  const app = await NestFactory.create(AppModule, { cors: { origin: '*' } })
 
   const configService = app.get<ConfigService>(ConfigService)
   const rmqService = app.get<RmqService>(RmqService)
