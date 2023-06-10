@@ -37,7 +37,12 @@ import { MatchesGateway } from './matches.gateway'
         RMQ_STATISTICS_QUEUE: Joi.string().required(),
       }),
     }),
-    RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE, SERVICES.CHATS_SERVICE]),
+    RmqModule.register([
+      SERVICES.AUTH_SERVICE,
+      SERVICES.NOTIFICATIONS_SERVICE,
+      SERVICES.CHATS_SERVICE,
+      SERVICES.STATISTICS_SERVICE,
+    ]),
     DatabaseModule,
     DatabaseModule.forFeature([
       { name: User.name, schema: UserSchema },
