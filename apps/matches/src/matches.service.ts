@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
-import { MatchDocument, MatchRepository, TeamRepository, UserDocument } from '@lib/common'
+import { MatchDocument, MatchRepository, PerformanceRepository, TeamRepository, UserDocument } from '@lib/common'
 import {
   EVENTS,
   MATCH_SQUAD_LIMIT,
@@ -22,12 +22,14 @@ import { UpdateSquadDto } from './dtos/update-squad.dto'
 import { UpdateMatchStatusDto } from './dtos/update-status.dto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { UpdateTossDto } from './dtos/update-toss.dto'
+import { NewBatterDto } from './dtos/new-batter.dto'
 
 @Injectable()
 export class MatchesService {
   constructor(
     private readonly MatchRepository: MatchRepository,
     private readonly TeamRepository: TeamRepository,
+    private readonly PerformanceRepository: PerformanceRepository,
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private notificationsService: ClientProxy,
     @Inject(SERVICES.CHATS_SERVICE) private chatsService: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
@@ -387,6 +389,40 @@ export class MatchesService {
 
     const updatedMatch = await this.MatchRepository.update(match._id, ballUpdateQuery, updateOptions)
     this.eventEmitter.emit(EVENTS.NEW_BALL_BOWLED, { ...newBallDto, batters: updatedMatch.live.batters })
+  }
+
+  async newBatter(newBatterDto: NewBatterDto, match: MatchDocument) {
+    if (match.status !== 'first-innings' && match.status !== 'second-innings')
+      throw new BadRequestException(
+        'Cannot update new batter when current match is not - "first-innings" or "second-innings"',
+      )
+
+    const noOfCurrentBatters = match.live.batters.length
+    if (noOfCurrentBatters > 1) throw new BadRequestException('There are already 2 batters on the pitch.')
+
+    const performanceObjectId = new Types.ObjectId()
+    const currentInningsKey = match.status === 'first-innings' ? 'firstInnings' : 'secondInnings'
+    const willNewBatterBeOnStrike = !match.live.batters[0].isOnStrike
+    const noOfWickets = match[currentInningsKey].wickets
+
+    const createPerformancePromise = this.PerformanceRepository.create({
+      match: newBatterDto.matchId,
+      player: newBatterDto.playerId,
+      batting: { position: noOfWickets === 0 ? (noOfCurrentBatters === 0 ? 1 : 2) : noOfWickets + 2 },
+    })
+    const updateMatchPromise = this.MatchRepository.update(newBatterDto.matchId, {
+      $push: {
+        [`${currentInningsKey}.batting`]: performanceObjectId,
+        'live.batters': {
+          performance: performanceObjectId,
+          player: newBatterDto.playerId,
+          isOnStrike: willNewBatterBeOnStrike,
+        },
+      },
+    })
+
+    const [performance, updatedMatch] = await Promise.all([createPerformancePromise, updateMatchPromise])
+    return { performance, match: updatedMatch }
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {

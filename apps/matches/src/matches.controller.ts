@@ -8,6 +8,7 @@ import { UpdateSquadDto } from './dtos/update-squad.dto'
 import { UpdateMatchStatusDto } from './dtos/update-status.dto'
 import { Match } from './decorators/match.decorator'
 import { UpdateTossDto } from './dtos/update-toss.dto'
+import { NewBatterDto } from './dtos/new-batter.dto'
 
 @Controller('matches')
 export class MatchesController {
@@ -106,5 +107,12 @@ export class MatchesController {
   async httpNewBallBowled(@Body() newBallDto: NewBallDto, @Match() match: MatchDocument) {
     await this.matchesService.newBallBowled(newBallDto, match)
     return { success: true, message: 'Match new ball updated successfully' }
+  }
+
+  @Patch('newBatter')
+  @Auth({ types: ['scorer'] })
+  async httpNewAbtter(@Body() newBatterDto: NewBatterDto, @Match() match: MatchDocument) {
+    const result = await this.matchesService.newBatter(newBatterDto, match)
+    return { success: true, message: 'Match new batter updated successfully', data: { result } }
   }
 }

@@ -9,6 +9,9 @@ import {
   Match,
   MatchRepository,
   MatchSchema,
+  Performance,
+  PerformanceRepository,
+  PerformanceSchema,
   RmqModule,
   Team,
   TeamRepository,
@@ -48,6 +51,7 @@ import { MatchesGateway } from './matches.gateway'
       { name: User.name, schema: UserSchema },
       { name: Team.name, schema: TeamSchema },
       { name: Match.name, schema: MatchSchema },
+      { name: Performance.name, schema: PerformanceSchema },
     ]),
   ],
   controllers: [MatchesController],
@@ -59,6 +63,7 @@ import { MatchesGateway } from './matches.gateway'
     TeamRepository,
     { provide: APP_GUARD, useClass: Authorize },
     MatchRepository,
+    PerformanceRepository,
   ],
 })
 export class MatchesModule {}

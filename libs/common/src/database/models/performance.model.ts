@@ -6,46 +6,46 @@ export type PerformanceDocument = Performance & Document
 @Schema()
 class BattingPerformace {
   @Prop({ default: 0 })
-  runs: number
+  runs?: number
 
   @Prop({ default: 0 })
-  balls: number
+  balls?: number
 
   @Prop({ default: 0 })
-  strikeRate: number
+  strikeRate?: number
 
   @Prop({ default: 0 })
-  fours: number
+  fours?: number
 
   @Prop({ default: 0 })
-  sixes: number
+  sixes?: number
 
   @Prop({ default: null })
-  position: number
+  position?: number
 }
 
 @Schema()
 class BowlingPerformace {
   @Prop({ default: 0 })
-  overs: number
+  overs?: number
 
   @Prop({ default: 0 })
-  balls: number
+  balls?: number
 
   @Prop({ default: 0 })
-  runsConceded: number
+  runsConceded?: number
 
   @Prop({ default: 0 })
-  wickets: number
+  wickets?: number
 
   @Prop({ default: 0 })
-  economy: number
+  economy?: number
 
   @Prop({ default: 0 })
-  noballs: number
+  noballs?: number
 
   @Prop({ default: 0 })
-  wides: number
+  wides?: number
 }
 
 @Schema({ timestamps: true })
