@@ -36,6 +36,9 @@ export class User {
 
   @Prop({ default: null, ref: 'Chat' })
   chat?: Types.ObjectId
+
+  @Prop({ default: null, ref: 'Performance' })
+  performance?: Types.ObjectId
 }
 
 const UserSchema = SchemaFactory.createForClass(User)
