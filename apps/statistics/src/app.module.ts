@@ -5,6 +5,7 @@ import { SERVICES } from '@lib/utils'
 import { RmqModule, DatabaseModule, Authorize } from '@lib/common'
 import { APP_GUARD } from '@nestjs/core'
 import { StatisticsModule } from './statistics/statistics.module'
+import { PerformanceModule } from './performance/performance.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { StatisticsModule } from './statistics/statistics.module'
     RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE, SERVICES.MATCH_SERVICE]),
     DatabaseModule,
     StatisticsModule,
+    PerformanceModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: Authorize }],
