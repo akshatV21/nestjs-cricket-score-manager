@@ -104,8 +104,12 @@ export class MatchesController {
 
   @Patch('newBall')
   @Auth({ types: ['scorer'] })
-  async httpNewBallBowled(@Body() newBallDto: NewBallDto, @Match() match: MatchDocument) {
-    await this.matchesService.newBallBowled(newBallDto, match)
+  async httpNewBallBowled(
+    @Body() newBallDto: NewBallDto,
+    @Match() match: MatchDocument,
+    @Token() token: Types.ObjectId,
+  ) {
+    await this.matchesService.newBallBowled(newBallDto, match, token)
     return { success: true, message: 'Match new ball updated successfully' }
   }
 

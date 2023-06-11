@@ -12,6 +12,7 @@ import {
   MatchStatus,
   MatchStatusUpdatedDto,
   NewBallDto,
+  NewBallPerformanceDto,
   SERVICES,
   TossUpdatedDto,
   UPCOMING_MATCHES_LIMIT,
@@ -32,6 +33,7 @@ export class MatchesService {
     private readonly PerformanceRepository: PerformanceRepository,
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private notificationsService: ClientProxy,
     @Inject(SERVICES.CHATS_SERVICE) private chatsService: ClientProxy,
+    @Inject(SERVICES.STATISTICS_SERVICE) private readonly statisticsService: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -319,7 +321,7 @@ export class MatchesService {
     this.eventEmitter.emit(EVENTS.TOSS_UPDATED, updateTossDto)
   }
 
-  async newBallBowled(newBallDto: NewBallDto, match: MatchDocument) {
+  async newBallBowled(newBallDto: NewBallDto, match: MatchDocument, token: Types.ObjectId) {
     if (match.status !== 'first-innings' && match.status !== 'second-innings')
       throw new BadRequestException(
         'Cannot update new ball when current match is not - "first-innings" or "second-innings"',
@@ -388,7 +390,9 @@ export class MatchesService {
     }
 
     const updatedMatch = await this.MatchRepository.update(match._id, ballUpdateQuery, updateOptions)
+
     this.eventEmitter.emit(EVENTS.NEW_BALL_BOWLED, { ...newBallDto, batters: updatedMatch.live.batters })
+    this.statisticsService.emit<any, NewBallPerformanceDto>(EVENTS.NEW_BALL_BOWLED, { token, body: newBallDto })
   }
 
   async newBatter(newBatterDto: NewBatterDto, match: MatchDocument) {
@@ -405,24 +409,33 @@ export class MatchesService {
     const willNewBatterBeOnStrike = !match.live.batters[0].isOnStrike
     const noOfWickets = match[currentInningsKey].wickets
 
-    const createPerformancePromise = this.PerformanceRepository.create({
-      match: newBatterDto.matchId,
-      player: newBatterDto.playerId,
-      batting: { position: noOfWickets === 0 ? (noOfCurrentBatters === 0 ? 1 : 2) : noOfWickets + 2 },
-    })
-    const updateMatchPromise = this.MatchRepository.update(newBatterDto.matchId, {
-      $push: {
-        [`${currentInningsKey}.batting`]: performanceObjectId,
-        'live.batters': {
-          performance: performanceObjectId,
-          player: newBatterDto.playerId,
-          isOnStrike: willNewBatterBeOnStrike,
-        },
-      },
-    })
+    const session = await this.MatchRepository.startTransaction()
 
-    const [performance, updatedMatch] = await Promise.all([createPerformancePromise, updateMatchPromise])
-    return { performance, match: updatedMatch }
+    try {
+      const createPerformancePromise = this.PerformanceRepository.create({
+        match: newBatterDto.matchId,
+        player: newBatterDto.playerId,
+        batting: { position: noOfWickets === 0 ? (noOfCurrentBatters === 0 ? 1 : 2) : noOfWickets + 2 },
+      })
+      const updateMatchPromise = this.MatchRepository.update(newBatterDto.matchId, {
+        $push: {
+          [`${currentInningsKey}.batting`]: performanceObjectId,
+          'live.batters': {
+            performance: performanceObjectId,
+            player: newBatterDto.playerId,
+            isOnStrike: willNewBatterBeOnStrike,
+          },
+        },
+      })
+
+      const [performance, updatedMatch] = await Promise.all([createPerformancePromise, updateMatchPromise])
+      await session.commitTransaction()
+
+      return { performance, match: updatedMatch }
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {

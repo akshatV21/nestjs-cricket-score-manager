@@ -22,6 +22,9 @@ class BattingPerformace {
 
   @Prop({ default: null })
   position?: number
+
+  @Prop({ default: true })
+  isNotOut?: boolean
 }
 
 @Schema()
