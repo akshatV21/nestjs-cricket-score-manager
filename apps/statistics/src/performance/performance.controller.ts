@@ -1,9 +1,10 @@
-import { Controller, Get, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
+import { Controller, Get, Req, UseGuards, UsePipes, ValidationPipe, Param } from '@nestjs/common'
 import { PerformanceService } from './performance.service'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { EVENTS, NewBallPerformanceDto } from '@lib/utils'
+import { EVENTS, NewBallPerformanceDto, ParseObjectId } from '@lib/utils'
 import { Auth, Authorize } from '@lib/common'
 import { Request } from 'express'
+import { Types } from 'mongoose'
 
 @Controller('performance')
 export class PerformanceController {
@@ -22,5 +23,12 @@ export class PerformanceController {
   async httpListPerformances(@Req() req: Request) {
     const performances = await this.performanceService.list(req.query)
     return { success: true, message: 'Fetched performances successfully', data: { performances } }
+  }
+
+  @Get(':performanceId')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpGetPerformance(@Param('performanceId', ParseObjectId) performanceId: Types.ObjectId) {
+    const performance = await this.performanceService.get(performanceId)
+    return { success: true, message: 'Fetched performance successfully', data: { performance } }
   }
 }

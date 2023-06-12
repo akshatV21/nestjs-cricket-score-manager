@@ -60,6 +60,10 @@ export class PerformanceService {
     }
   }
 
+  async get(performanceId: Types.ObjectId) {
+    return this.PerformaceRepository.findById(performanceId)
+  }
+
   async list(queries: Record<string, any>) {
     const filterBy: 'match' | 'player' = queries.filterBy
     const targetDocumentId = filterBy === 'match' ? queries.matchId : queries.playerId
