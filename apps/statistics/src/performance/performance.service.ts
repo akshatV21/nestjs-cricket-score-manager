@@ -1,7 +1,7 @@
 import { PerformanceDocument, PerformanceRepository } from '@lib/common'
-import { NewBallPerformanceDto } from '@lib/utils'
-import { Injectable } from '@nestjs/common'
-import { UpdateQuery } from 'mongoose'
+import { NewBallPerformanceDto, PLAYER_PERF_LIMIT } from '@lib/utils'
+import { Injectable, BadRequestException } from '@nestjs/common'
+import { FilterQuery, Query, QueryOptions, Types, UpdateQuery } from 'mongoose'
 
 @Injectable()
 export class PerformanceService {
@@ -58,5 +58,22 @@ export class PerformanceService {
       await session.abortTransaction()
       throw error
     }
+  }
+
+  async list(queries: Record<string, any>) {
+    const filterBy: 'match' | 'player' = queries.filterBy
+    const targetDocumentId = filterBy === 'match' ? queries.matchId : queries.playerId
+    if (!targetDocumentId)
+      throw new BadRequestException(`You need to provide the ${filterBy} id to lists the performances.`)
+
+    const skipCount = (queries.page - 1) / PLAYER_PERF_LIMIT
+    const fetchQuery: FilterQuery<PerformanceDocument> = { [filterBy]: new Types.ObjectId(targetDocumentId) }
+    const options: QueryOptions<PerformanceDocument> = {
+      skip: skipCount,
+      limit: PLAYER_PERF_LIMIT,
+    }
+
+    const performances = await this.PerformaceRepository.find(fetchQuery, {}, options)
+    return performances
   }
 }
