@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common'
 import { MatchesService } from './matches.service'
 import { Auth, MatchDocument, ReqUser, Token, UserDocument } from '@lib/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
@@ -9,6 +9,7 @@ import { UpdateMatchStatusDto } from './dtos/update-status.dto'
 import { Match } from './decorators/match.decorator'
 import { UpdateTossDto } from './dtos/update-toss.dto'
 import { NewBatterDto } from './dtos/new-batter.dto'
+import { IsMatchScorer } from './guards/is-match-scorer.guard'
 
 @Controller('matches')
 export class MatchesController {
@@ -90,6 +91,7 @@ export class MatchesController {
 
   @Patch('status')
   @Auth({ types: ['scorer'] })
+  @UseGuards(IsMatchScorer)
   async httpUpdateMatchStatus(@Body() updaeMatchStatusDto: UpdateMatchStatusDto, @Match() match: MatchDocument) {
     await this.matchesService.status(updaeMatchStatusDto, match)
     return { success: true, message: 'Match status updated successfully' }
@@ -97,6 +99,7 @@ export class MatchesController {
 
   @Patch('toss')
   @Auth({ types: ['scorer'] })
+  @UseGuards(IsMatchScorer)
   async httpUpdateMatchToss(@Body() updateTossDto: UpdateTossDto, @Match() match: MatchDocument) {
     await this.matchesService.toss(updateTossDto, match)
     return { success: true, message: 'Match toss updated successfully' }
@@ -104,6 +107,7 @@ export class MatchesController {
 
   @Patch('newBall')
   @Auth({ types: ['scorer'] })
+  @UseGuards(IsMatchScorer)
   async httpNewBallBowled(
     @Body() newBallDto: NewBallDto,
     @Match() match: MatchDocument,
@@ -115,8 +119,17 @@ export class MatchesController {
 
   @Patch('newBatter')
   @Auth({ types: ['scorer'] })
-  async httpNewAbtter(@Body() newBatterDto: NewBatterDto, @Match() match: MatchDocument) {
+  @UseGuards(IsMatchScorer)
+  async httpNewBatter(@Body() newBatterDto: NewBatterDto, @Match() match: MatchDocument) {
     const result = await this.matchesService.newBatter(newBatterDto, match)
     return { success: true, message: 'Match new batter updated successfully', data: { result } }
+  }
+
+  @Patch('endMatch')
+  @Auth({ types: ['scorer'] })
+  @UseGuards(IsMatchScorer)
+  async httpEndMatch(@Match() match: MatchDocument) {
+    await this.matchesService.endMatch(match)
+    return { success: true, message: 'Match ended successfully' }
   }
 }

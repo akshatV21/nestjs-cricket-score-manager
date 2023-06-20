@@ -3,6 +3,9 @@ import { Types } from 'mongoose'
 
 @Schema()
 export class Inning {
+  @Prop({ default: null, ref: 'Team' })
+  team: Types.ObjectId
+
   @Prop({ default: 0 })
   runs: number
 

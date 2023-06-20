@@ -4,6 +4,7 @@ import {
   AuthorizeDto,
   EVENTS,
   EXCEPTION_MSGS,
+  MatchEndedDto,
   MatchStatusUpdatedDto,
   NewBallBowledDto,
   SERVICES,
@@ -65,11 +66,16 @@ export class MatchesGateway {
 
   @OnEvent(EVENTS.TOSS_UPDATED)
   handleTossUpdatedEvent(payload: TossUpdatedDto) {
-    this.server.emit(payload.matchId as string, payload)
+    this.server.to(payload.matchId as string).emit(EVENTS.TOSS_UPDATED, payload)
   }
 
   @OnEvent(EVENTS.NEW_BALL_BOWLED)
   handleNewBallBowledEvent(payload: NewBallBowledDto) {
     this.server.to(payload.matchId as string).emit(EVENTS.NEW_BALL_BOWLED, payload)
+  }
+
+  @OnEvent(EVENTS.MATCH_ENDED)
+  handleMatchEndedEvent(payload: MatchEndedDto) {
+    this.server.to(payload.matchId as string).emit(EVENTS.MATCH_ENDED, payload)
   }
 }

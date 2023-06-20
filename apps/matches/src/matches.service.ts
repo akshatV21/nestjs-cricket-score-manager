@@ -5,6 +5,7 @@ import {
   EVENTS,
   MATCH_SQUAD_LIMIT,
   MATCH_STATUS,
+  MatchEndedDto,
   MatchRequestDeniedDto,
   MatchRequestedDto,
   MatchScheduledDto,
@@ -16,6 +17,7 @@ import {
   SERVICES,
   TossUpdatedDto,
   UPCOMING_MATCHES_LIMIT,
+  WonBy,
 } from '@lib/utils'
 import { FilterQuery, ProjectionType, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { ClientProxy } from '@nestjs/microservices'
@@ -436,6 +438,33 @@ export class MatchesService {
       await session.abortTransaction()
       throw error
     }
+  }
+
+  async endMatch(match: MatchDocument) {
+    let wonBy: WonBy
+
+    const chasingTeamIsAllOut = match.secondInnings.wickets === 10
+    const targetIsChased = match.firstInnings.runs + 1 <= match.secondInnings.runs
+    const isEndOfInning = match.secondInnings.overs === 19 && match.secondInnings.balls === 6
+
+    if (targetIsChased) wonBy = 'chasing'
+    else if (chasingTeamIsAllOut || isEndOfInning) wonBy = 'defending'
+
+    const resultObj = {
+      wonBy,
+      winningTeam: wonBy === 'chasing' ? match.secondInnings.team : match.firstInnings.team,
+      runs: wonBy === 'defending' ? match.firstInnings.runs - match.secondInnings.runs : null,
+      wickets: wonBy === 'chasing' ? 10 - match.secondInnings.wickets : null,
+    }
+
+    const matchUpdateQuery: UpdateQuery<MatchDocument> = {
+      $set: { result: resultObj, status: MATCH_STATUS.FINISHED, live: null },
+    }
+
+    await this.MatchRepository.update(match._id, matchUpdateQuery)
+
+    const payload: MatchEndedDto = { matchId: match._id, ...resultObj }
+    this.eventEmitter.emit(EVENTS.MATCH_ENDED, payload)
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {

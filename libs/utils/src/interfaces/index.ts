@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io'
-import { MatchStatus, RequestType, TossValue, TossWinningOption, UserType } from '../types'
+import { MatchStatus, RequestType, TossValue, TossWinningOption, UserType, WonBy } from '../types'
 import { ChatDocument, LiveBattersSchema, MessageDocument, RequestDocument } from '@lib/common'
 import { Types } from 'mongoose'
 
@@ -148,4 +148,12 @@ export class NewBallBowledDto {
   batter: Types.ObjectId | string
   bowler: Types.ObjectId | string
   batters: LiveBattersSchema[]
+}
+
+export class MatchEndedDto {
+  matchId: Types.ObjectId | string
+  wonBy: WonBy
+  winningTeam: Types.ObjectId | string
+  runs: number | null
+  wickets: number | null
 }

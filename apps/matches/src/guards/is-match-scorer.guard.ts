@@ -16,8 +16,8 @@ export class IsMatchScorer implements CanActivate {
 
     if (!match.teams.includes(new Types.ObjectId(scorer.team)))
       throw new ForbiddenException('You are forbidden to make this request.')
+      
     request.match = matchId
-
     return true
   }
 }
