@@ -2,7 +2,18 @@ import { Module } from '@nestjs/common'
 import { MailerModule as MailModule } from '@nestjs-modules/mailer'
 import { MailerService } from './mailer.service'
 import { ConfigService } from '@nestjs/config'
-import { DatabaseModule, Request, RequestRepository, RequestSchema, Team, TeamRepository, TeamSchema, User, UserRepository, UserSchema } from '@lib/common'
+import {
+  DatabaseModule,
+  Request,
+  RequestRepository,
+  RequestSchema,
+  Team,
+  TeamRepository,
+  TeamSchema,
+  User,
+  UserRepository,
+  UserSchema,
+} from '@lib/common'
 
 @Module({
   imports: [

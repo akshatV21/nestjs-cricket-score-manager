@@ -5,7 +5,7 @@ import { SERVICES } from '@lib/utils'
 import { RmqModule, DatabaseModule, Authorize } from '@lib/common'
 import { APP_GUARD } from '@nestjs/core'
 import { StatisticsModule } from './statistics/statistics.module'
-import { PerformanceModule } from './performance/performance.module';
+import { PerformanceModule } from './performance/performance.module'
 
 @Module({
   imports: [

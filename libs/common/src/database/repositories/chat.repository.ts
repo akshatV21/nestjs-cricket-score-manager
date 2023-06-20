@@ -6,10 +6,7 @@ import { Connection, Model } from 'mongoose'
 
 @Injectable()
 export class ChatRepository extends AbstractRepository<ChatDocument, Chat> {
-  constructor(
-    @InjectModel(Chat.name) ChatModel: Model<ChatDocument>,
-    @InjectConnection() connection: Connection,
-  ) {
+  constructor(@InjectModel(Chat.name) ChatModel: Model<ChatDocument>, @InjectConnection() connection: Connection) {
     super(ChatModel, connection)
   }
 }

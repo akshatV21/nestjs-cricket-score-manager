@@ -6,7 +6,10 @@ import { Connection, Model } from 'mongoose'
 
 @Injectable()
 export class MessageRepository extends AbstractRepository<MessageDocument, Message> {
-  constructor(@InjectModel(Message.name) MessageModel: Model<MessageDocument>, @InjectConnection() connection: Connection) {
+  constructor(
+    @InjectModel(Message.name) MessageModel: Model<MessageDocument>,
+    @InjectConnection() connection: Connection,
+  ) {
     super(MessageModel, connection)
   }
 }
