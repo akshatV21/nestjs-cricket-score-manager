@@ -17,9 +17,6 @@ export class Team {
   @Prop({ default: [], ref: 'User' })
   squad?: Types.ObjectId[]
 
-  @Prop({ default: null, ref: 'Match' })
-  nextMatch?: Types.ObjectId
-
   @Prop({ default: [], ref: 'Match' })
   matchesPlayed?: Types.ObjectId[]
 

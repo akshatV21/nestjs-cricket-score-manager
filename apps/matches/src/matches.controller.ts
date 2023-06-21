@@ -108,11 +108,7 @@ export class MatchesController {
   @Patch('newBall')
   @Auth({ types: ['scorer'] })
   @UseGuards(IsMatchScorer)
-  async httpNewBallBowled(
-    @Body() newBallDto: NewBallDto,
-    @Match() match: MatchDocument,
-    @Token() token: Types.ObjectId,
-  ) {
+  async httpNewBallBowled(@Body() newBallDto: NewBallDto, @Match() match: MatchDocument, @Token() token: string) {
     await this.matchesService.newBallBowled(newBallDto, match, token)
     return { success: true, message: 'Match new ball updated successfully' }
   }
@@ -128,8 +124,8 @@ export class MatchesController {
   @Patch('endMatch')
   @Auth({ types: ['scorer'] })
   @UseGuards(IsMatchScorer)
-  async httpEndMatch(@Match() match: MatchDocument) {
-    await this.matchesService.endMatch(match)
+  async httpEndMatch(@Match() match: MatchDocument, @Token() token: string) {
+    await this.matchesService.endMatch(match, token)
     return { success: true, message: 'Match ended successfully' }
   }
 }

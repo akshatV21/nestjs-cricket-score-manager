@@ -45,6 +45,7 @@ import { MatchesGateway } from './matches.gateway'
       SERVICES.NOTIFICATIONS_SERVICE,
       SERVICES.CHATS_SERVICE,
       SERVICES.STATISTICS_SERVICE,
+      SERVICES.TEAMS_SERVICE,
     ]),
     DatabaseModule,
     DatabaseModule.forFeature([

@@ -3,7 +3,7 @@ import { CreateTeamDto } from './dtos/create-team.dto'
 import { TeamDocument, UserDocument, UserRepository } from '@lib/common'
 import { TeamRepository } from '@lib/common/database/repositories/team.repository'
 import { ProjectionType, QueryOptions, Types } from 'mongoose'
-import { EVENTS, SERVICES, TEAMS_PAGINATION_LIMIT, TeamCreatedDto } from '@lib/utils'
+import { EVENTS, MatchEndedServiceDto, SERVICES, TEAMS_PAGINATION_LIMIT, TeamCreatedDto } from '@lib/utils'
 import { RemovePlayerDto } from './dtos/remove-player.dto'
 import { RemoveScorerDto } from './dtos/remove-scorer.dto'
 import { UpdateNameDto } from './dtos/update-name.dto'
@@ -103,4 +103,6 @@ export class TeamsService {
   async updateName({ name }: UpdateNameDto, user: UserDocument) {
     await this.TeamRepository.update(user.team, { $set: { name } })
   }
+
+  async updateUpcomingAndPLayedMatches({ body }: MatchEndedServiceDto) {}
 }

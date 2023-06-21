@@ -1,13 +1,11 @@
 import { NewBallDto } from '@lib/utils'
 import { Type } from 'class-transformer'
-import { IsDefined, IsMongoId, IsNotEmpty, IsNotEmptyObject, ValidateNested } from 'class-validator'
-import { Types } from 'mongoose'
+import { IsDefined, IsMongoId, IsNotEmpty, IsNotEmptyObject, IsString, ValidateNested } from 'class-validator'
 
 export class NewBallPerformanceDto {
   @IsNotEmpty()
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
-  token: Types.ObjectId
+  @IsString()
+  token: string
 
   @IsDefined()
   @IsNotEmptyObject()

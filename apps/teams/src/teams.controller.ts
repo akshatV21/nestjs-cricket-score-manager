@@ -1,15 +1,28 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UsePipes,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common'
 import { TeamsService } from './teams.service'
-import { Auth, ReqUser, UserDocument, Token } from '@lib/common'
+import { Auth, ReqUser, UserDocument, Token, Authorize } from '@lib/common'
 import { CreateTeamDto } from './dtos/create-team.dto'
 import { Types } from 'mongoose'
 import { CreateRequestDto } from './dtos/create-request.dto'
-import { ParseObjectId } from '@lib/utils'
+import { EVENTS, MatchEndedServiceDto, ParseObjectId } from '@lib/utils'
 import { RequestsService } from './requests/requests.service'
 import { UpdateRequestDto } from './dtos/update-request.dto'
 import { RemovePlayerDto } from './dtos/remove-player.dto'
 import { RemoveScorerDto } from './dtos/remove-scorer.dto'
 import { UpdateNameDto } from './dtos/update-name.dto'
+import { MessagePattern, Payload } from '@nestjs/microservices'
 
 @Controller('teams')
 export class TeamsController {
@@ -114,4 +127,10 @@ export class TeamsController {
     const request = await this.requestsService.get(requestId, user)
     return { success: true, message: 'Requests fetched successfully.', data: { request } }
   }
+
+  @MessagePattern(EVENTS.MATCH_ENDED)
+  @Auth({ types: ['scorer'] })
+  @UseGuards(Authorize)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  handleMatchEndedEvent(@Payload() payload: MatchEndedServiceDto) {}
 }

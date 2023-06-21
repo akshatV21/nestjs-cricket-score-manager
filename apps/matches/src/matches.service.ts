@@ -6,6 +6,7 @@ import {
   MATCH_SQUAD_LIMIT,
   MATCH_STATUS,
   MatchEndedDto,
+  MatchEndedServiceDto,
   MatchRequestDeniedDto,
   MatchRequestedDto,
   MatchScheduledDto,
@@ -36,6 +37,7 @@ export class MatchesService {
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private notificationsService: ClientProxy,
     @Inject(SERVICES.CHATS_SERVICE) private chatsService: ClientProxy,
     @Inject(SERVICES.STATISTICS_SERVICE) private readonly statisticsService: ClientProxy,
+    @Inject(SERVICES.TEAMS_SERVICE) private readonly teamsService: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -323,7 +325,7 @@ export class MatchesService {
     this.eventEmitter.emit(EVENTS.TOSS_UPDATED, updateTossDto)
   }
 
-  async newBallBowled(newBallDto: NewBallDto, match: MatchDocument, token: Types.ObjectId) {
+  async newBallBowled(newBallDto: NewBallDto, match: MatchDocument, token: string) {
     if (match.status !== 'first-innings' && match.status !== 'second-innings')
       throw new BadRequestException(
         'Cannot update new ball when current match is not - "first-innings" or "second-innings"',
@@ -440,7 +442,7 @@ export class MatchesService {
     }
   }
 
-  async endMatch(match: MatchDocument) {
+  async endMatch(match: MatchDocument, token: string) {
     let wonBy: WonBy
 
     const chasingTeamIsAllOut = match.secondInnings.wickets === 10
@@ -463,8 +465,11 @@ export class MatchesService {
 
     await this.MatchRepository.update(match._id, matchUpdateQuery)
 
-    const payload: MatchEndedDto = { matchId: match._id, ...resultObj }
-    this.eventEmitter.emit(EVENTS.MATCH_ENDED, payload)
+    const eventEmitterPayload: MatchEndedDto = { matchId: match._id, ...resultObj }
+    const teamServicePayload: MatchEndedServiceDto = { token, body: { matchId: match._id, teams: match.teams } }
+
+    this.eventEmitter.emit(EVENTS.MATCH_ENDED, eventEmitterPayload)
+    this.teamsService.emit(EVENTS.MATCH_ENDED, teamServicePayload)
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
