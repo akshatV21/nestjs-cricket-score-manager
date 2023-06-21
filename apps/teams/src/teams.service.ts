@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, InternalServerErrorException }
 import { CreateTeamDto } from './dtos/create-team.dto'
 import { TeamDocument, UserDocument, UserRepository } from '@lib/common'
 import { TeamRepository } from '@lib/common/database/repositories/team.repository'
-import { ProjectionType, QueryOptions, Types } from 'mongoose'
+import { ProjectionType, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { EVENTS, MatchEndedServiceDto, SERVICES, TEAMS_PAGINATION_LIMIT, TeamCreatedDto } from '@lib/utils'
 import { RemovePlayerDto } from './dtos/remove-player.dto'
 import { RemoveScorerDto } from './dtos/remove-scorer.dto'
@@ -104,5 +104,23 @@ export class TeamsService {
     await this.TeamRepository.update(user.team, { $set: { name } })
   }
 
-  async updateUpcomingAndPLayedMatches({ body }: MatchEndedServiceDto) {}
+  async updateUpcomingAndPLayedMatches({ body }: MatchEndedServiceDto) {
+    const updateQuery: UpdateQuery<TeamDocument> = {
+      $pull: { upcomingMatches: body.matchId },
+      $push: { matchesPlayed: body.matchId },
+    }
+
+    const session = await this.TeamRepository.startTransaction()
+
+    try {
+      const teamOneUpdatePromise = this.TeamRepository.update(body.teams[0], updateQuery)
+      const teamTwoUpdatePromise = this.TeamRepository.update(body.teams[1], updateQuery)
+
+      await Promise.all([teamOneUpdatePromise, teamTwoUpdatePromise])
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
+  }
 }

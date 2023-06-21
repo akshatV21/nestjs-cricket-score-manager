@@ -132,5 +132,7 @@ export class TeamsController {
   @Auth({ types: ['scorer'] })
   @UseGuards(Authorize)
   @UsePipes(new ValidationPipe({ transform: true }))
-  handleMatchEndedEvent(@Payload() payload: MatchEndedServiceDto) {}
+  handleMatchEndedEvent(@Payload() payload: MatchEndedServiceDto) {
+    this.teamsService.updateUpcomingAndPLayedMatches(payload)
+  }
 }
