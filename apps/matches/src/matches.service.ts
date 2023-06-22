@@ -27,6 +27,7 @@ import { UpdateMatchStatusDto } from './dtos/update-status.dto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { UpdateTossDto } from './dtos/update-toss.dto'
 import { NewBatterDto } from './dtos/new-batter.dto'
+import { RescheduleMatchDto } from './dtos/reschedule-match.dto'
 
 @Injectable()
 export class MatchesService {
@@ -470,6 +471,17 @@ export class MatchesService {
 
     this.eventEmitter.emit(EVENTS.MATCH_ENDED, eventEmitterPayload)
     this.teamsService.emit(EVENTS.MATCH_ENDED, teamServicePayload)
+  }
+
+  async reschedule({ matchId, time }: RescheduleMatchDto, user: UserDocument) {
+    const getTeamPromise = this.TeamRepository.findOne(user.team, { upcomingMatches: 1 })
+    const getMatchPromise = this.MatchRepository.findById(matchId, { status: 1 })
+
+    const [team, match] = await Promise.all([getTeamPromise, getMatchPromise])
+    if (match.status !== 'upcoming') throw new BadRequestException('Cannot reschedule a match at this stage.')
+    if (!team.upcomingMatches.includes(matchId)) throw new ForbiddenException('You cannot make this request.')
+
+    await this.MatchRepository.update(matchId, { $set: { time, status: MATCH_STATUS.RESCHEDULED } })
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {

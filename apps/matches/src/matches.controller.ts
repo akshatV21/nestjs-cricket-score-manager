@@ -10,6 +10,7 @@ import { Match } from './decorators/match.decorator'
 import { UpdateTossDto } from './dtos/update-toss.dto'
 import { NewBatterDto } from './dtos/new-batter.dto'
 import { IsMatchScorer } from './guards/is-match-scorer.guard'
+import { RescheduleMatchDto } from './dtos/reschedule-match.dto'
 
 @Controller('matches')
 export class MatchesController {
@@ -19,21 +20,21 @@ export class MatchesController {
   @Auth({ types: ['manager'] })
   async httpCreateMatch(@Body() createMatchDto: CreateMatchDto, @ReqUser() user: UserDocument, @Token() token: string) {
     const match = await this.matchesService.create(createMatchDto, user, token)
-    return { success: true, message: 'Match created successfully', data: { match } }
+    return { success: true, message: 'Match created successfully.', data: { match } }
   }
 
   @Get(':matchId')
   @Auth({ types: ['player', 'scorer', 'manager'] })
   async httpGetMatchById(@Param('matchId', ParseObjectId) matchId: Types.ObjectId, @ReqUser() user: UserDocument) {
     const match = await this.matchesService.get(matchId, user)
-    return { success: true, message: 'Match fetched successfully', data: { match } }
+    return { success: true, message: 'Match fetched successfully.', data: { match } }
   }
 
   @Get('requests')
   @Auth({ types: ['manager'] })
   async httpGetTeamMatchRequests(@ReqUser() user: UserDocument) {
     const matches = await this.matchesService.listMatchRequests(new Types.ObjectId(user.team))
-    return { success: true, message: 'Matches fetched successfully', data: { matches } }
+    return { success: true, message: 'Matches fetched successfully.', data: { matches } }
   }
 
   @Get('upcoming')
@@ -43,7 +44,7 @@ export class MatchesController {
     @Query('teamId', ParseObjectId) teamId: Types.ObjectId,
   ) {
     const matches = await this.matchesService.listUpcomingMatches(page, teamId)
-    return { success: true, message: 'Matches fetched successfully', data: { matches } }
+    return { success: true, message: 'Matches fetched successfully.', data: { matches } }
   }
 
   @Get('live')
@@ -53,7 +54,7 @@ export class MatchesController {
     @Query('teamId', ParseObjectId) teamId: Types.ObjectId,
   ) {
     const matches = await this.matchesService.listLiveMatches(page, teamId)
-    return { success: true, message: 'Matches fetched successfully', data: { matches } }
+    return { success: true, message: 'Matches fetched successfully.', data: { matches } }
   }
 
   @Patch('schedule/:matchId')
@@ -64,7 +65,7 @@ export class MatchesController {
     @Token() token: string,
   ) {
     await this.matchesService.schedule(matchId, user, token)
-    return { success: true, message: 'Match scheduled successfully' }
+    return { success: true, message: 'Match scheduled successfully.' }
   }
 
   @Patch('deny/:matchId')
@@ -75,7 +76,7 @@ export class MatchesController {
     @Token() token: string,
   ) {
     await this.matchesService.deny(matchId, user, token)
-    return { success: true, message: 'Match request denied successfully' }
+    return { success: true, message: 'Match request denied successfully.' }
   }
 
   @Patch('squads')
@@ -86,7 +87,7 @@ export class MatchesController {
     @Token() token: string,
   ) {
     await this.matchesService.squads(updateSquadDto, user, token)
-    return { success: true, message: 'Match sqaud updated successfully' }
+    return { success: true, message: 'Match sqaud updated successfully.' }
   }
 
   @Patch('status')
@@ -94,7 +95,7 @@ export class MatchesController {
   @UseGuards(IsMatchScorer)
   async httpUpdateMatchStatus(@Body() updaeMatchStatusDto: UpdateMatchStatusDto, @Match() match: MatchDocument) {
     await this.matchesService.status(updaeMatchStatusDto, match)
-    return { success: true, message: 'Match status updated successfully' }
+    return { success: true, message: 'Match status updated successfully.' }
   }
 
   @Patch('toss')
@@ -102,7 +103,7 @@ export class MatchesController {
   @UseGuards(IsMatchScorer)
   async httpUpdateMatchToss(@Body() updateTossDto: UpdateTossDto, @Match() match: MatchDocument) {
     await this.matchesService.toss(updateTossDto, match)
-    return { success: true, message: 'Match toss updated successfully' }
+    return { success: true, message: 'Match toss updated successfully.' }
   }
 
   @Patch('newBall')
@@ -110,7 +111,7 @@ export class MatchesController {
   @UseGuards(IsMatchScorer)
   async httpNewBallBowled(@Body() newBallDto: NewBallDto, @Match() match: MatchDocument, @Token() token: string) {
     await this.matchesService.newBallBowled(newBallDto, match, token)
-    return { success: true, message: 'Match new ball updated successfully' }
+    return { success: true, message: 'Match new ball updated successfully.' }
   }
 
   @Patch('newBatter')
@@ -118,7 +119,7 @@ export class MatchesController {
   @UseGuards(IsMatchScorer)
   async httpNewBatter(@Body() newBatterDto: NewBatterDto, @Match() match: MatchDocument) {
     const result = await this.matchesService.newBatter(newBatterDto, match)
-    return { success: true, message: 'Match new batter updated successfully', data: { result } }
+    return { success: true, message: 'Match new batter updated successfully.', data: { result } }
   }
 
   @Patch('endMatch')
@@ -126,6 +127,13 @@ export class MatchesController {
   @UseGuards(IsMatchScorer)
   async httpEndMatch(@Match() match: MatchDocument, @Token() token: string) {
     await this.matchesService.endMatch(match, token)
-    return { success: true, message: 'Match ended successfully' }
+    return { success: true, message: 'Match ended successfully.' }
+  }
+
+  @Patch('reschedule')
+  @Auth({ types: ['manager'] })
+  async httpRescheduleMatch(@Body() rescheduleMatchDto: RescheduleMatchDto, @ReqUser() user: UserDocument) {
+    await this.matchesService.reschedule(rescheduleMatchDto, user)
+    return { success: true, message: 'Match rescheduled successfully.', data: rescheduleMatchDto }
   }
 }
