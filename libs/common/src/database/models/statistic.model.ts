@@ -57,10 +57,10 @@ export class Statistic {
   player: Types.ObjectId
 
   @Prop({ default: { innings: 0, runs: 0, balls: 0, average: 0, strikeRate: 0, fours: 0, sixes: 0 } })
-  batting: BattingSchema
+  batting?: BattingSchema
 
   @Prop({ default: { balls: 0, runsConceded: 0, wickets: 0, average: 0, economy: 0, noballs: 0, wides: 0 } })
-  bowling: BowlingSchema
+  bowling?: BowlingSchema
 }
 
 export const StatisticSchema = SchemaFactory.createForClass(Statistic)
