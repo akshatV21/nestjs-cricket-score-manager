@@ -3,7 +3,7 @@ import { BadRequestException, ContextType, Inject, Injectable, UnauthorizedExcep
 import { RegisterUserDto } from './dtos/register-user.dto'
 import { sign, verify } from 'jsonwebtoken'
 import { ConfigService } from '@nestjs/config'
-import { EVENTS, EXCEPTION_MSGS, SERVICES, UserRegisteredDto } from '@lib/utils'
+import { CreateStatisticDto, EVENTS, EXCEPTION_MSGS, SERVICES, UserRegisteredDto } from '@lib/utils'
 import { ClientProxy, RpcException } from '@nestjs/microservices'
 import { LoginUserDto } from './dtos/login-user.dto'
 import { compareSync } from 'bcrypt'
@@ -49,6 +49,9 @@ export class AuthService {
 
     user.isEmailValidated = true
     await user.save()
+
+    const payload: CreateStatisticDto = { token, body: { playerId: user._id } }
+    this.statisticsService.emit(EVENTS.USER_EMAIL_VALIDATED, payload)
   }
 
   async resend(email: string) {

@@ -15,6 +15,7 @@ export const SERVICES = {
 
 export const EVENTS = {
   USER_REGISTERED: 'user-registered',
+  USER_EMAIL_VALIDATED: 'user-email-validated',
   AUTHORIZE: 'authorize',
   REQUEST_CREATED: 'request-created',
   REQUEST_ACCEPTED: 'request-accepted',
