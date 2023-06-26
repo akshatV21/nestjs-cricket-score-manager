@@ -15,6 +15,7 @@ export class AuthService {
     private readonly UserRepository: UserRepository,
     private readonly configService: ConfigService,
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private readonly notificationsService: ClientProxy,
+    @Inject(SERVICES.STATISTICS_SERVICE) private readonly statisticsService: ClientProxy,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {

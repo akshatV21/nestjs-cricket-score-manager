@@ -21,7 +21,7 @@ import { APP_GUARD } from '@nestjs/core'
         RMQ_NOTIFICATIONS_QUEUE: Joi.string().required(),
       }),
     }),
-    RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE]),
+    RmqModule.register([SERVICES.AUTH_SERVICE, SERVICES.NOTIFICATIONS_SERVICE, SERVICES.STATISTICS_SERVICE]),
     DatabaseModule,
     DatabaseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
