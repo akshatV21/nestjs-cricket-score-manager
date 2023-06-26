@@ -1,6 +1,13 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
-import { MatchDocument, MatchRepository, PerformanceRepository, TeamRepository, UserDocument } from '@lib/common'
+import {
+  MatchDocument,
+  MatchRepository,
+  PerformanceRepository,
+  TeamRepository,
+  UserDocument,
+  UserRepository,
+} from '@lib/common'
 import {
   EVENTS,
   MATCH_SQUAD_LIMIT,
@@ -35,6 +42,7 @@ export class MatchesService {
     private readonly MatchRepository: MatchRepository,
     private readonly TeamRepository: TeamRepository,
     private readonly PerformanceRepository: PerformanceRepository,
+    private readonly UserRepository: UserRepository,
     @Inject(SERVICES.NOTIFICATIONS_SERVICE) private notificationsService: ClientProxy,
     @Inject(SERVICES.CHATS_SERVICE) private chatsService: ClientProxy,
     @Inject(SERVICES.STATISTICS_SERVICE) private readonly statisticsService: ClientProxy,
@@ -432,8 +440,15 @@ export class MatchesService {
           },
         },
       })
+      const updateUserPromise = this.UserRepository.update(newBatterDto.playerId, {
+        $push: { performances: performanceObjectId },
+      })
 
-      const [performance, updatedMatch] = await Promise.all([createPerformancePromise, updateMatchPromise])
+      const [performance, updatedMatch] = await Promise.all([
+        createPerformancePromise,
+        updateMatchPromise,
+        updateUserPromise,
+      ])
       await session.commitTransaction()
 
       return { performance, match: updatedMatch }
