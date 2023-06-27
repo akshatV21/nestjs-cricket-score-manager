@@ -427,7 +427,12 @@ export class MatchesService {
     const noOfCurrentBatters = match.live.batters.length
     if (noOfCurrentBatters > 1) throw new BadRequestException('There are already 2 batters on the pitch.')
 
-    const performanceObjectId = new Types.ObjectId()
+    const performanceId = await this.PerformanceRepository.exists({
+      match: newBatterDto.matchId,
+      player: newBatterDto.playerId,
+    })
+    if (!performanceId._id) throw new BadRequestException('There is no performace document for the player.')
+
     const currentInningsKey = match.status === 'first-innings' ? 'firstInnings' : 'secondInnings'
     const willNewBatterBeOnStrike = !match.live.batters[0].isOnStrike
     const noOfWickets = match[currentInningsKey].wickets
@@ -435,27 +440,25 @@ export class MatchesService {
     const session = await this.MatchRepository.startTransaction()
 
     try {
-      const createPerformancePromise = this.PerformanceRepository.create({
-        match: newBatterDto.matchId,
-        player: newBatterDto.playerId,
+      const updatePerformancePromise = this.PerformanceRepository.update(performanceId._id, {
         batting: { position: noOfWickets === 0 ? (noOfCurrentBatters === 0 ? 1 : 2) : noOfWickets + 2 },
       })
       const updateMatchPromise = this.MatchRepository.update(newBatterDto.matchId, {
         $push: {
-          [`${currentInningsKey}.batting`]: performanceObjectId,
+          [`${currentInningsKey}.batting`]: performanceId._id,
           'live.batters': {
-            performance: performanceObjectId,
+            performance: performanceId._id,
             player: newBatterDto.playerId,
             isOnStrike: willNewBatterBeOnStrike,
           },
         },
       })
       const updateUserPromise = this.UserRepository.update(newBatterDto.playerId, {
-        $push: { performances: performanceObjectId },
+        $push: { performances: performanceId._id },
       })
 
       const [performance, updatedMatch] = await Promise.all([
-        createPerformancePromise,
+        updatePerformancePromise,
         updateMatchPromise,
         updateUserPromise,
       ])
