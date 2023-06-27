@@ -43,4 +43,8 @@ export abstract class AbstractRepository<T extends Document, S extends Record<st
     session.startTransaction()
     return session
   }
+
+  async exists(query: FilterQuery<T>) {
+    return this.AbstractModel.exists(query)
+  }
 }
