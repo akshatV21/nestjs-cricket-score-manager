@@ -39,3 +39,4 @@ node_modules
 *.env
 
 /list.txt
+/scc.exe
