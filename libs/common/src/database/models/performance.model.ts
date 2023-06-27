@@ -25,6 +25,9 @@ class BattingPerformace {
 
   @Prop({ default: null })
   isNotOut?: boolean
+
+  @Prop({ default: true })
+  didNotBat?: boolean
 }
 
 @Schema()
@@ -59,7 +62,7 @@ export class Performance {
   @Prop({ required: true, ref: 'Match' })
   match: Types.ObjectId
 
-  @Prop({ default: { runs: 0, balls: 0, strikeRate: 0, fours: 0, sixes: 0 } })
+  @Prop({ default: { runs: 0, balls: 0, strikeRate: 0, fours: 0, sixes: 0, didNotBat: true } })
   batting?: BattingPerformace
 
   @Prop({ default: { overs: 0, balls: 0, runsConceded: 0, wickets: 0, economy: 0, noballs: 0, wides: 0 } })

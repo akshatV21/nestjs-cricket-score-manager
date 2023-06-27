@@ -1,13 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { CreateMatchDto } from './dtos/create-match.dto'
-import {
-  MatchDocument,
-  MatchRepository,
-  PerformanceRepository,
-  TeamRepository,
-  UserDocument,
-  UserRepository,
-} from '@lib/common'
+import { MatchDocument, MatchRepository, PerformanceRepository, TeamRepository, UserDocument, UserRepository } from '@lib/common'
 import {
   CreatePerformanceDto,
   EVENTS,
@@ -26,6 +19,7 @@ import {
   SERVICES,
   TossUpdatedDto,
   UPCOMING_MATCHES_LIMIT,
+  UpdateStatisticsDto,
   WonBy,
 } from '@lib/utils'
 import { FilterQuery, ProjectionType, QueryOptions, Types, UpdateQuery } from 'mongoose'
@@ -84,11 +78,7 @@ export class MatchesService {
         $push: { upcomingMatches: matchObjectId },
       })
 
-      const [match, opponentTeam, fromTeam] = await Promise.all([
-        createMatchPromise,
-        updateTeamOnePromise,
-        updateTeamTwoPromise,
-      ])
+      const [match, opponentTeam, fromTeam] = await Promise.all([createMatchPromise, updateTeamOnePromise, updateTeamTwoPromise])
       const payload: MatchRequestedDto = {
         body: {
           fromTeamName: fromTeam.name,
@@ -127,11 +117,7 @@ export class MatchesService {
       populate: { path: 'teams', select: 'name' },
     }
 
-    return this.MatchRepository.find(
-      { teams: { $elemMatch: { $in: [teamId] } }, status: MATCH_STATUS.REQUESTED },
-      projections,
-      options,
-    )
+    return this.MatchRepository.find({ teams: { $elemMatch: { $in: [teamId] } }, status: MATCH_STATUS.REQUESTED }, projections, options)
   }
 
   async listUpcomingMatches(page: number, teamId: Types.ObjectId) {
@@ -157,23 +143,13 @@ export class MatchesService {
     const query: FilterQuery<MatchDocument> = teamId
       ? {
           status: {
-            $in: [
-              MATCH_STATUS.FIRST_INNINGS,
-              MATCH_STATUS.SECOND_INNINGS,
-              MATCH_STATUS.TOSS,
-              MATCH_STATUS.INNINGS_BREAK,
-            ],
+            $in: [MATCH_STATUS.FIRST_INNINGS, MATCH_STATUS.SECOND_INNINGS, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK],
           },
           teams: { $elemMatch: { $in: [teamId] } },
         }
       : {
           status: {
-            $in: [
-              MATCH_STATUS.FIRST_INNINGS,
-              MATCH_STATUS.SECOND_INNINGS,
-              MATCH_STATUS.TOSS,
-              MATCH_STATUS.INNINGS_BREAK,
-            ],
+            $in: [MATCH_STATUS.FIRST_INNINGS, MATCH_STATUS.SECOND_INNINGS, MATCH_STATUS.TOSS, MATCH_STATUS.INNINGS_BREAK],
           },
         }
 
@@ -193,8 +169,7 @@ export class MatchesService {
     if (!match.teams.includes(user.team) || user._id.equals(match.requestBy))
       throw new ForbiddenException('You are not authorized to make this request')
 
-    if (match.status !== 'requested')
-      throw new BadRequestException('Cannot make this change with current match status.')
+    if (match.status !== 'requested') throw new BadRequestException('Cannot make this change with current match status.')
 
     const userTeamId = new Types.ObjectId(user.team)
     const opponentTeamId = new Types.ObjectId(match.requestBy)
@@ -244,8 +219,7 @@ export class MatchesService {
     if (!match.teams.includes(user.team) || user._id.equals(match.requestBy))
       throw new ForbiddenException('You are not authorized to make this request')
 
-    if (match.status !== 'requested')
-      throw new BadRequestException('Cannot make this change with current match status.')
+    if (match.status !== 'requested') throw new BadRequestException('Cannot make this change with current match status.')
 
     const opponentTeamId = new Types.ObjectId(match.requestBy)
     const userTeamId = new Types.ObjectId(user.team)
@@ -284,8 +258,7 @@ export class MatchesService {
     const noOfPlayersAlreadyAdded = match.squads.find(squad => squad.team === user.team).players.length
     const noOfPlayerSlotsRemaining = MATCH_SQUAD_LIMIT - noOfPlayersAlreadyAdded
 
-    if (noOfPlayersAlreadyAdded >= MATCH_SQUAD_LIMIT)
-      throw new BadRequestException('Your squad already consists of 11 players.')
+    if (noOfPlayersAlreadyAdded >= MATCH_SQUAD_LIMIT) throw new BadRequestException('Your squad already consists of 11 players.')
 
     if (noOfPlayersToAdd > noOfPlayerSlotsRemaining)
       throw new BadRequestException(
@@ -318,8 +291,7 @@ export class MatchesService {
   }
 
   async toss(updateTossDto: UpdateTossDto, match: MatchDocument, token: string) {
-    if (match.status !== 'toss')
-      throw new BadRequestException('Cannot update toss when current match status in not - "TOSS"')
+    if (match.status !== 'toss') throw new BadRequestException('Cannot update toss when current match status in not - "TOSS"')
 
     await this.MatchRepository.update(match._id, {
       $set: {
@@ -346,9 +318,7 @@ export class MatchesService {
 
   async newBallBowled(newBallDto: NewBallDto, match: MatchDocument, token: string) {
     if (match.status !== 'first-innings' && match.status !== 'second-innings')
-      throw new BadRequestException(
-        'Cannot update new ball when current match is not - "first-innings" or "second-innings"',
-      )
+      throw new BadRequestException('Cannot update new ball when current match is not - "first-innings" or "second-innings"')
 
     let score = newBallDto.runs
     score += newBallDto.isNoBall ? 1 : 0
@@ -420,9 +390,7 @@ export class MatchesService {
 
   async newBatter(newBatterDto: NewBatterDto, match: MatchDocument) {
     if (match.status !== 'first-innings' && match.status !== 'second-innings')
-      throw new BadRequestException(
-        'Cannot update new batter when current match is not - "first-innings" or "second-innings"',
-      )
+      throw new BadRequestException('Cannot update new batter when current match is not - "first-innings" or "second-innings"')
 
     const noOfCurrentBatters = match.live.batters.length
     if (noOfCurrentBatters > 1) throw new BadRequestException('There are already 2 batters on the pitch.')
@@ -441,7 +409,10 @@ export class MatchesService {
 
     try {
       const updatePerformancePromise = this.PerformanceRepository.update(performanceId._id, {
-        batting: { position: noOfWickets === 0 ? (noOfCurrentBatters === 0 ? 1 : 2) : noOfWickets + 2 },
+        $set: {
+          'batting.position': noOfWickets === 0 ? (noOfCurrentBatters === 0 ? 1 : 2) : noOfWickets + 2,
+          'batting.didNotBat': false,
+        },
       })
       const updateMatchPromise = this.MatchRepository.update(newBatterDto.matchId, {
         $push: {
@@ -457,11 +428,7 @@ export class MatchesService {
         $push: { performances: performanceId._id },
       })
 
-      const [performance, updatedMatch] = await Promise.all([
-        updatePerformancePromise,
-        updateMatchPromise,
-        updateUserPromise,
-      ])
+      const [performance, updatedMatch] = await Promise.all([updatePerformancePromise, updateMatchPromise, updateUserPromise])
       await session.commitTransaction()
 
       return { performance, match: updatedMatch }
@@ -496,9 +463,14 @@ export class MatchesService {
 
     const eventEmitterPayload: MatchEndedDto = { matchId: match._id, ...resultObj }
     const teamServicePayload: MatchEndedServiceDto = { token, body: { matchId: match._id, teams: match.teams } }
+    const statisticsServicePayload: UpdateStatisticsDto = {
+      token,
+      body: { matchId: match._id, players: [...match.squads[0].players, ...match.squads[1].players] },
+    }
 
     this.eventEmitter.emit(EVENTS.MATCH_ENDED, eventEmitterPayload)
     this.teamsService.emit(EVENTS.MATCH_ENDED, teamServicePayload)
+    this.statisticsService.emit(EVENTS.MATCH_ENDED, statisticsServicePayload)
   }
 
   async reschedule({ matchId, time }: RescheduleMatchDto, user: UserDocument) {
@@ -513,8 +485,7 @@ export class MatchesService {
   }
 
   private async canUpdateStatus(currentStatus: MatchStatus, updateToStatus: MatchStatus) {
-    if (currentStatus === updateToStatus)
-      throw new BadRequestException(`The match status is already set to the ${currentStatus}.`)
+    if (currentStatus === updateToStatus) throw new BadRequestException(`The match status is already set to the ${currentStatus}.`)
 
     if (updateToStatus === 'toss' && currentStatus !== 'requested')
       throw new BadRequestException(`Cannot change current match status of ${currentStatus} to ${updateToStatus}.`)

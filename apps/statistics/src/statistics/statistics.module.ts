@@ -14,6 +14,9 @@ import {
   MatchRepository,
   Statistic,
   StatisticSchema,
+  Performance,
+  PerformanceSchema,
+  PerformanceRepository,
 } from '@lib/common'
 
 @Module({
@@ -23,9 +26,10 @@ import {
       { name: Team.name, schema: TeamSchema },
       { name: Match.name, schema: MatchSchema },
       { name: Statistic.name, schema: StatisticSchema },
+      { name: Performance.name, schema: PerformanceSchema },
     ]),
   ],
   controllers: [StatisticsController],
-  providers: [StatisticsService, UserRepository, TeamRepository, MatchRepository],
+  providers: [StatisticsService, UserRepository, TeamRepository, MatchRepository, PerformanceRepository],
 })
 export class StatisticsModule {}

@@ -4,5 +4,5 @@
   "semi": false,
   "arrowParens": "avoid",
   "endOfLine": "lf",
-  "printWidth": 120
+  "printWidth": 140
 }
