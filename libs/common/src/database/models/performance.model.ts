@@ -23,7 +23,7 @@ class BattingPerformace {
   @Prop({ default: null })
   position?: number
 
-  @Prop({ default: true })
+  @Prop({ default: null })
   isNotOut?: boolean
 }
 

@@ -9,6 +9,7 @@ import {
   UserRepository,
 } from '@lib/common'
 import {
+  CreatePerformanceDto,
   EVENTS,
   MATCH_SQUAD_LIMIT,
   MATCH_STATUS,
@@ -316,7 +317,7 @@ export class MatchesService {
     this.eventEmitter.emit(EVENTS.MATCH_STATUS_UPDATED, payload)
   }
 
-  async toss(updateTossDto: UpdateTossDto, match: MatchDocument) {
+  async toss(updateTossDto: UpdateTossDto, match: MatchDocument, token: string) {
     if (match.status !== 'toss')
       throw new BadRequestException('Cannot update toss when current match status in not - "TOSS"')
 
@@ -331,7 +332,16 @@ export class MatchesService {
       },
     })
 
+    const createPerformanceDto: CreatePerformanceDto = {
+      token,
+      body: {
+        matchId: match._id,
+        players: [...match.squads[0].players, ...match.squads[1].players],
+      },
+    }
+
     this.eventEmitter.emit(EVENTS.TOSS_UPDATED, updateTossDto)
+    this.statisticsService.emit(EVENTS.TOSS_UPDATED, createPerformanceDto)
   }
 
   async newBallBowled(newBallDto: NewBallDto, match: MatchDocument, token: string) {

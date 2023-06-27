@@ -1,11 +1,39 @@
-import { PerformanceDocument, PerformanceRepository } from '@lib/common'
-import { NewBallPerformanceDto, PLAYER_PERF_LIMIT } from '@lib/utils'
+import { PerformanceDocument, PerformanceRepository, UserDocument, UserRepository } from '@lib/common'
+import { CreatePerformanceDto, NewBallPerformanceDto, PLAYER_PERF_LIMIT } from '@lib/utils'
 import { Injectable, BadRequestException } from '@nestjs/common'
 import { FilterQuery, Query, QueryOptions, Types, UpdateQuery } from 'mongoose'
 
 @Injectable()
 export class PerformanceService {
-  constructor(private readonly PerformaceRepository: PerformanceRepository) {}
+  constructor(
+    private readonly PerformaceRepository: PerformanceRepository,
+    private readonly UserRepository: UserRepository,
+  ) {}
+
+  async createMatchPlayerPerformance({ body }: CreatePerformanceDto) {
+    const session = await this.PerformaceRepository.startTransaction()
+    const promises: Promise<PerformanceDocument | UserDocument>[] = []
+
+    try {
+      body.players.forEach(playerId => {
+        const performanceObjectId = new Types.ObjectId()
+
+        const createPerformancePromise = this.PerformaceRepository.create({ match: body.matchId, player: playerId })
+        const updatePlayerPromise = this.UserRepository.update(playerId, {
+          $push: { performances: performanceObjectId },
+        })
+
+        promises.push(createPerformancePromise)
+        promises.push(updatePlayerPromise)
+      })
+
+      await Promise.all(promises)
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    }
+  }
 
   async newBallPerformance({ body }: NewBallPerformanceDto) {
     const getBatterPromise = this.PerformaceRepository.findOne({ player: body.batter })

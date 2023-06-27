@@ -1,7 +1,7 @@
 import { Controller, Get, Req, UseGuards, UsePipes, ValidationPipe, Param } from '@nestjs/common'
 import { PerformanceService } from './performance.service'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { EVENTS, NewBallPerformanceDto, ParseObjectId } from '@lib/utils'
+import { CreatePerformanceDto, EVENTS, NewBallPerformanceDto, ParseObjectId } from '@lib/utils'
 import { Auth, Authorize } from '@lib/common'
 import { Request } from 'express'
 import { Types } from 'mongoose'
@@ -9,6 +9,14 @@ import { Types } from 'mongoose'
 @Controller('performance')
 export class PerformanceController {
   constructor(private readonly performanceService: PerformanceService) {}
+
+  @MessagePattern(EVENTS.TOSS_UPDATED)
+  @Auth({ types: ['scorer'] })
+  @UseGuards(Authorize)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  handleTossUpdated(@Payload() createPerformaceDto: CreatePerformanceDto) {
+    this.performanceService.createMatchPlayerPerformance(createPerformaceDto)
+  }
 
   @MessagePattern(EVENTS.NEW_BALL_BOWLED)
   @Auth({ types: ['scorer'] })
