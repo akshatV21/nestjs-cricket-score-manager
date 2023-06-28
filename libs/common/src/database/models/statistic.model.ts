@@ -28,6 +28,12 @@ export class BattingSchema {
 
   @Prop()
   notOuts?: number
+
+  @Prop()
+  halfCenturies?: number
+
+  @Prop()
+  centuries?: number
 }
 
 @Schema()
@@ -62,7 +68,9 @@ export class Statistic {
   @Prop({ default: 0 })
   matchesPlayed?: number
 
-  @Prop({ default: { innings: 0, runs: 0, balls: 0, average: 0, strikeRate: 0, fours: 0, sixes: 0, notOuts: 0 } })
+  @Prop({
+    default: { innings: 0, runs: 0, balls: 0, average: 0, strikeRate: 0, fours: 0, sixes: 0, notOuts: 0, halfCenturies: 0, centuries: 0 },
+  })
   batting?: BattingSchema
 
   @Prop({ default: { balls: 0, runsConceded: 0, wickets: 0, average: 0, economy: 0, noballs: 0, wides: 0 } })
