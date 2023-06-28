@@ -131,10 +131,10 @@ export const BATTER_STATS = {
   MOST_BALLS: 'balls',
   MOST_FOURS: 'fours',
   MOST_SIXES: 'sixes',
-  MOST_HALF_CENTURIES: 'half-centuries',
+  MOST_HALF_CENTURIES: 'halfCenturies',
   MOST_CENTURIES: 'centuries',
   BEST_AVERAGE: 'average',
-  BEST_STRIKE_RATE: 'strike-rate',
+  BEST_STRIKE_RATE: 'strikeRate',
 } as const
 
 export const BOWLER_STATS = {
