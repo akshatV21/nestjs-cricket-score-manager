@@ -121,7 +121,7 @@ export class MatchesService {
   }
 
   async listUpcomingMatches(page: number, teamId: Types.ObjectId) {
-    const skipCount = (page - 1) / UPCOMING_MATCHES_LIMIT
+    const skipCount = (page - 1) * UPCOMING_MATCHES_LIMIT
 
     const query: FilterQuery<MatchDocument> = teamId
       ? { status: MATCH_STATUS.UPCOMING, teams: { $elemMatch: { $in: [teamId] } } }

@@ -1,5 +1,5 @@
 import { PerformanceDocument, PerformanceRepository, StatisticDocument, StatisticRepository, UserRepository } from '@lib/common'
-import { CreateStatisticDto, UpdateStatisticsDto } from '@lib/utils'
+import { BATTER_STATS, CreateStatisticDto, PLAYER_STATS_LIMIT, UpdateStatisticsDto, BatterStats, StatType, BowlerStats } from '@lib/utils'
 import { Injectable } from '@nestjs/common'
 import { Types, UpdateQuery } from 'mongoose'
 
@@ -83,7 +83,20 @@ export class StatisticsService {
     await Promise.all(updateStatisticsPromises)
   }
 
-  async getPlayerStatistics(playerId: Types.ObjectId) {
+  async getSinglePlayerStatistics(playerId: Types.ObjectId) {
     return this.StatisticRepository.findOne({ playerId: playerId })
+  }
+
+  async getPlayerStatistics(stat: BatterStats | BowlerStats, page: number, statType: StatType) {
+    const skipCount = (page - 1) * PLAYER_STATS_LIMIT
+    const statProperty = `${statType}.${BATTER_STATS[stat]}`
+
+    const statistics = await this.StatisticRepository.find(
+      {},
+      {},
+      { sort: { [statProperty]: -1 }, skip: skipCount, limit: PLAYER_STATS_LIMIT },
+    )
+
+    return statistics
   }
 }

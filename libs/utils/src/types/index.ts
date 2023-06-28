@@ -1,4 +1,6 @@
 import {
+  BATTER_STATS,
+  BOWLER_STATS,
   CHAT_TYPE,
   CONTEXT_TYPES,
   FORMATS,
@@ -41,3 +43,9 @@ export type WonBy = ObjectValuesUnion<typeof WON_BY_VALUES>
 export type TossValue = ObjectValuesUnion<typeof TOSS_VALUES>
 
 export type TossWinningOption = ObjectValuesUnion<typeof TOSS_WINNING_OPTIONS>
+
+export type BatterStats = ObjectValuesUnion<typeof BATTER_STATS>
+
+export type BowlerStats = ObjectValuesUnion<typeof BOWLER_STATS>
+
+export type StatType = 'batting' | 'bowling'

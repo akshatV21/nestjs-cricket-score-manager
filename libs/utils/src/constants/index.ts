@@ -73,6 +73,7 @@ export const CHATS_PAGENATION_LIMIT = 4
 export const UPCOMING_MATCHES_LIMIT = 10
 export const MATCH_SQUAD_LIMIT = 11
 export const PLAYER_PERF_LIMIT = 10
+export const PLAYER_STATS_LIMIT = 10
 
 export const CHAT_TYPE = {
   IN_TEAM: 'in-team',
@@ -123,4 +124,25 @@ export const TOSS_VALUES = {
 export const TOSS_WINNING_OPTIONS = {
   BATTING: 'battling',
   BOWLING: 'bowling',
+} as const
+
+export const BATTER_STATS = {
+  MOST_RUNS: 'runs',
+  MOST_BALLS: 'balls',
+  MOST_FOURS: 'fours',
+  MOST_SIXES: 'sixes',
+  MOST_HALF_CENTURIES: 'half-centuries',
+  MOST_CENTURIES: 'centuries',
+  BEST_AVERAGE: 'average',
+  BEST_STRIKE_RATE: 'strike-rate',
+} as const
+
+export const BOWLER_STATS = {
+  MOST_WICKETS: 'wickets',
+  BEST_AVERAGE: 'average',
+  BEST_ECONOMY: 'economy',
+  MOST_RUNS_CONCEDED: 'runsConceded',
+  MOST_NOBALLS: 'noballs',
+  MOST_WIDES: 'wides',
+  MOST_BALLS: 'balls',
 } as const

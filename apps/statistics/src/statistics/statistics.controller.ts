@@ -1,7 +1,7 @@
-import { Controller, Get, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
+import { Controller, Get, Query, UseGuards, UsePipes, ValidationPipe, Param } from '@nestjs/common'
 import { StatisticsService } from '../statistics/statistics.service'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { CreateStatisticDto, EVENTS, ParseObjectId, UpdateStatisticsDto } from '@lib/utils'
+import { BatterStats, BowlerStats, CreateStatisticDto, EVENTS, ParseObjectId, UpdateStatisticsDto } from '@lib/utils'
 import { Auth, Authorize } from '@lib/common'
 import { Types } from 'mongoose'
 
@@ -27,8 +27,22 @@ export class StatisticsController {
 
   @Get()
   @Auth({ types: ['player', 'scorer', 'manager'] })
-  async httpGetPlayerStatistics(@Query('playerId', ParseObjectId) playerId: Types.ObjectId) {
-    const statistics = await this.statisticsService.getPlayerStatistics(playerId)
+  async httpGetSinglePlayerStatistics(@Query('playerId', ParseObjectId) playerId: Types.ObjectId) {
+    const statistics = await this.statisticsService.getSinglePlayerStatistics(playerId)
     return { success: true, message: 'Player statistics fetched successfully.', data: { statistics } }
+  }
+
+  @Get('batters/:stat')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpGetBatterStatistics(@Param('stat') stat: BatterStats, @Query('page') page: number) {
+    const statistics = await this.statisticsService.getPlayerStatistics(stat, page, 'batting')
+    return { success: true, message: 'Batter statistics fetched successfully.', data: { statistics } }
+  }
+
+  @Get('bowlers/:stat')
+  @Auth({ types: ['player', 'scorer', 'manager'] })
+  async httpGetBowlerStatistics(@Param('stat') stat: BowlerStats, @Query('page') page: number) {
+    const statistics = await this.statisticsService.getPlayerStatistics(stat, page, 'bowling')
+    return { success: true, message: 'Bowler statistics fetched successfully.', data: { statistics } }
   }
 }

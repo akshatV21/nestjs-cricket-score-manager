@@ -62,7 +62,7 @@ export class TeamsService {
     const projections: ProjectionType<TeamDocument> = { name: 1, manager: 1, scorer: 1 }
     const options: QueryOptions<TeamDocument> = {
       populate: { path: 'manager scorer', select: 'firstName lastName email' },
-      skipCount,
+      skip: skipCount,
       limit: TEAMS_PAGINATION_LIMIT,
     }
 
