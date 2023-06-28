@@ -68,6 +68,8 @@ export class StatisticsService {
           'batting.balls': performance.batting.balls,
           'batting.fours': performance.batting.fours,
           'batting.sixes': performance.batting.sixes,
+          'batting.halfCenturies': performance.batting.runs >= 50 ? 1 : 0,
+          'batting.centuries': performance.batting.runs >= 100 ? 1 : 0,
           'bowling.balls': performance.bowling.balls,
           'bowling.runsConceded': performance.bowling.runsConceded,
           'bowling.wickets': performance.bowling.wickets,
