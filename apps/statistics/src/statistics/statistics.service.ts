@@ -82,4 +82,8 @@ export class StatisticsService {
 
     await Promise.all(updateStatisticsPromises)
   }
+
+  async getPlayerStatistics(playerId: Types.ObjectId) {
+    return this.StatisticRepository.findOne({ playerId: playerId })
+  }
 }
