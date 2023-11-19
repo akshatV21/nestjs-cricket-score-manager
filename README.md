@@ -1,73 +1,56 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Cricket Score Manager Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Cricket Score Manager Backend is a microservice-based application developed using Nest.js, MongoDB, RabbitMQ, and Redis. This application offers comprehensive features for team management, match scheduling, real-time updates, and player/team statistics calculation. It simplifies the process of managing and tracking cricket scores and statistics.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Team Management:** Easily manage cricket teams, including player rosters and team details.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Match Scheduling:** Schedule cricket matches with ease, specifying details such as date, time, and participating teams.
 
-## Installation
+- **Real-time Updates:** Enjoy real-time updates during matches, keeping users informed about the latest scores and events.
 
-```bash
-$ npm install
-```
+- **Statistics Calculation:** Automatically calculate player and team statistics, providing valuable insights into performance.
 
-## Running the app
+## Technologies Used
 
-```bash
-# development
-$ npm run start
+- **Nest.js:** A powerful Node.js framework for building scalable and efficient server-side applications.
 
-# watch mode
-$ npm run start:dev
+- **MongoDB:** A NoSQL database used for storing and retrieving data efficiently.
 
-# production mode
-$ npm run start:prod
-```
+- **RabbitMQ:** A message broker that enables communication between microservices, ensuring seamless integration.
 
-## Test
+- **Redis:** An in-memory data structure store used for caching, enhancing the performance of the application.
 
-```bash
-# unit tests
-$ npm run test
+## Getting Started
 
-# e2e tests
-$ npm run test:e2e
+1. Clone the repository:
 
-# test coverage
-$ npm run test:cov
-```
+  ```bash
+   git clone https://github.com/akshatV21/nestjs-cricket-score-manager.git
+  ```
 
-## Support
+2, Install dependencies:
+  
+  ```bash
+    cd nestjs-cricket-score-manager
+  ```
+  ```bash
+    npm install
+  ```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+3. Configure the application by updating the necessary environment variables.
 
-## Stay in touch
+4. Run the application:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+  ```bash
+    npm start
+  ```
 
-## License
+**Contributing**
 
-Nest is [MIT licensed](LICENSE).
+Feel free to contribute to the project by opening issues, submitting pull requests, or providing suggestions. Your contributions are highly appreciated!
+
+**License**
+
+This project is licensed under the MIT License. Feel free to use, modify, and distribute the code as per the license terms.
